@@ -6,9 +6,7 @@ export default function Root() {
   return (
     <>
       {/* <Navigation /> */}
-      <div className="">
-        <Outlet />
-      </div>
+      <Outlet />
     </>
   );
 }

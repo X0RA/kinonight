@@ -1,36 +1,71 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import "tailwindcss/tailwind.css";
 import "./VideoPlayer.css"; // Import the custom CSS file
+import { useNavigate } from "react-router-dom";
+import PlayerControls from "./playerControls";
+
+import {
+  BsArrowsFullscreen,
+  BsPlay,
+  BsTrash3,
+  BsPause,
+  BsVolumeDown,
+  BsSkipForward,
+  BsSkipBackward,
+} from "react-icons/bs";
+import { GoSignOut } from "react-icons/go";
 
 export const VideoJS = (props) => {
-  const videoRef = React.useRef(null);
-  const playerRef = React.useRef(null);
+  const videoRef = useRef(null);
+  const playerRef = useRef(null);
   const { options, onReady } = props;
+  const Navigate = useNavigate();
 
-  React.useEffect(() => {
+  // Define state for video progress
+  const [progress, setProgress] = useState({ current: 0, duration: 0, percentage: 0 });
+
+  useEffect(() => {
     if (!playerRef.current) {
       const videoElement = document.createElement("video-js");
 
-      videoElement.classList.add(
-        "vjs-big-play-centered",
-        "rounded-lg",
-        "shadow",
-        "overflow-hidden",
-        "vjs-custom-skin",
-        "vjs-fill"
-      );
+      // document.body.style.overflow = "hidden";
+      // // Remove default body margin
+      // document.body.style.margin = "0";
+
+      const videoJsOptions = {
+        autoplay: true,
+        controls: false,
+        responsive: true,
+        fluid: true,
+        sources: [
+          {
+            src: "/test.mp4",
+            type: "video/mp4",
+          },
+        ],
+      };
+
+      videoElement.classList.add("video-js", "vjs-default-skin", "vjs-16-9", "vjs-big-play-centered");
 
       videoElement.style.width = "100%";
       videoElement.style.height = "100%";
 
       videoRef.current.appendChild(videoElement);
 
-      const player = (playerRef.current = videojs(videoElement, options, () => {
+      const player = (playerRef.current = videojs(videoElement, videoJsOptions, () => {
         videojs.log("player is ready");
         onReady && onReady(player);
       }));
+
+      player.on("timeupdate", () => {
+        setProgress({
+          current: player.currentTime(),
+          duration: player.duration(),
+          percentage: (player.currentTime() / player.duration()) * 100,
+        });
+      });
     } else {
       const player = playerRef.current;
 
@@ -39,7 +74,12 @@ export const VideoJS = (props) => {
     }
   }, [options, videoRef]);
 
-  React.useEffect(() => {
+  const logOut = () => {
+    document.cookie = "room=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    Navigate("/");
+  };
+
+  useEffect(() => {
     const player = playerRef.current;
 
     return () => {
@@ -50,9 +90,33 @@ export const VideoJS = (props) => {
     };
   }, [playerRef]);
 
+  // Function to format time
+  const formatTime = (time) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor(time % 60);
+    return `${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes}:${
+      seconds < 10 ? "0" + seconds : seconds
+    }`;
+  };
+
   return (
-    <div data-vjs-player className="mx-auto w-full h-full">
-      <div ref={videoRef} className="w-full h-full" />
+    <div
+      data-vjs-player
+      className="w-screen h-screen flex items-center justify-center bg-black relative hover:cursor-pointer">
+      <div
+        ref={videoRef}
+        className="w-full aspect-[16/9] max-h-screen object-cover"
+        style={{ maxWidth: "calc(100vh * 16 / 9)" }}
+      />
+      {/* <div className="control-bar bg-primary-500 h-16 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200"> */}
+      <div className="control-bar bg-primary-500 h-16 w-full absolute bottom-0 opacity-100 transition-opacity duration-200">
+        <PlayerControls
+          playerRef={playerRef}
+          progress={progress}
+          logOut={logOut}
+          formatTime={formatTime}></PlayerControls>
+      </div>
     </div>
   );
 };

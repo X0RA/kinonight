@@ -3,28 +3,24 @@
 @tailwind utilities;
 
 .vjs-custom-skin {
+}
+
+.vjs-custom-skin video {
+}
+
+.vjs-custom-skin {
   /* Change the color of the progress bar */
-  --progress-color: #1a202c;
 }
 
 .vjs-custom-skin .vjs-play-progress,
 .vjs-custom-skin .vjs-volume-level {
-  background-color: var(--progress-color) !important;
 }
 
 .vjs-custom-skin .vjs-play-control {
   /* Customize the play button */
-  @apply bg-primary-700;
 }
 
 .vjs-custom-skin .vjs-play-control::before {
-  content: "";
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23fff" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>'); /* replace with your svg path */
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  width: 100%;
-  height: 100%;
 }
 
 .vjs-custom-skin.vjs-playing .vjs-play-control::before {
@@ -42,4 +38,12 @@
 
 .vjs-custom-skin .vjs-fullscreen-control {
   /* Customize the fullscreen button */
+}
+
+.control-bar {
+  pointer-events: none;
+}
+
+[data-vjs-player]:hover .control-bar {
+  pointer-events: auto;
 }
