@@ -20,7 +20,7 @@ import { GoSignOut } from "react-icons/go";
 export const VideoJS = (props) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-  const { options, onReady } = props;
+  const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
 
   // Define state for video progress
@@ -30,23 +30,6 @@ export const VideoJS = (props) => {
     if (!playerRef.current) {
       const videoElement = document.createElement("video-js");
 
-      // document.body.style.overflow = "hidden";
-      // // Remove default body margin
-      // document.body.style.margin = "0";
-
-      const videoJsOptions = {
-        autoplay: true,
-        controls: false,
-        responsive: true,
-        fluid: true,
-        sources: [
-          {
-            src: "/test.mp4",
-            type: "video/mp4",
-          },
-        ],
-      };
-
       videoElement.classList.add("video-js", "vjs-default-skin", "vjs-16-9", "vjs-big-play-centered");
 
       videoElement.style.width = "100%";
@@ -54,7 +37,7 @@ export const VideoJS = (props) => {
 
       videoRef.current.appendChild(videoElement);
 
-      const player = (playerRef.current = videojs(videoElement, videoJsOptions, () => {
+      const player = (playerRef.current = videojs(videoElement, options, () => {
         videojs.log("player is ready");
         onReady && onReady(player);
       }));
@@ -109,12 +92,13 @@ export const VideoJS = (props) => {
         className="w-full aspect-[16/9] max-h-screen object-cover"
         style={{ maxWidth: "calc(100vh * 16 / 9)" }}
       />
-      {/* <div className="control-bar bg-primary-500 h-16 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200"> */}
-      <div className="control-bar bg-primary-500 h-16 w-full absolute bottom-0 opacity-100 transition-opacity duration-200">
+      <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
+        {/* <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100 transition-opacity duration-200"> */}
         <PlayerControls
           playerRef={playerRef}
           progress={progress}
           logOut={logOut}
+          clearVideo={clearVideo}
           formatTime={formatTime}></PlayerControls>
       </div>
     </div>

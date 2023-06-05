@@ -50,7 +50,6 @@ function Convert() {
       return url;
     }
   };
-
   const getPutIOVideoUrl = async (oauthToken) => {
     var apiUrl =
       "https://api.put.io/v2/files/public?codecs_parent=1&media_info_parent=1&mp4_status_parent=1&mp4_stream_url_parent=1&oauth_token=" +
@@ -58,7 +57,8 @@ function Convert() {
       "&stream_url_parent=1&video_metadata_parent=1";
     var apiResponse = await fetch(apiUrl);
     var jsonData = await apiResponse.json();
-    return jsonData.parent.stream_url;
+    console.log(jsonData);
+    return jsonData.parent.mp4_stream_url;
   };
 
   return (
