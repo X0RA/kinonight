@@ -2,19 +2,20 @@ import { useCookies } from "react-cookie";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../middleware/AuthContext";
-import auth from "../middleware/Firebase";
+import { useUserStatus } from "../middleware/StateContext";
 
 import { Fragment } from "react";
 import { Transition } from "@headlessui/react";
 
 function Index() {
   const [cookies, setCookie] = useCookies(["room", "username"]);
-  const [room, setRoom] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [room, setRoom] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { currentUser, loginOrSignUp, logout } = useAuth();
+  const { chosenRoom, setChosenRoom } = useUserStatus();
   const [loading, setLoading] = useState(false);
 
   const handleJoin = async () => {
@@ -22,6 +23,7 @@ function Index() {
       let res = await loginOrSignUp(username + "@kinonight.web.app", password);
       if (res.status) {
         if (room && room.trim() !== "") {
+          setChosenRoom(room);
           navigate("/room/" + room);
         } else {
           setError(["Enter a proper room name", ...error]);
@@ -33,6 +35,7 @@ function Index() {
     }
     if (currentUser) {
       if (room && room.trim() !== "") {
+        setChosenRoom(room);
         navigate("/room/" + room);
       } else {
         setError(["Enter a proper room name", ...error]);

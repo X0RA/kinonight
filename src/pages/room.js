@@ -2,79 +2,88 @@ import { VideoJS } from "../components/videoPlayer";
 import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import VideoOptionsPage from "../components/videoOptions";
+import { useUserStatus } from "../middleware/StateContext";
+import { processUrl } from "../components/helpers";
+import { useAuth } from "../middleware/AuthContext";
+import { useNavigate } from "react-router-dom";
+import BubblePopper from "../components/bubblePopper";
 
 function Room() {
-  const [cookies, setCookie] = useCookies(["room", "username"]);
-  const [room, setRoom] = useState("");
-  const [username, setUsername] = useState("");
-
+  const navigate = useNavigate();
   const [videoOptions, setVideoOptions] = useState(null);
+  const { currentUser } = useAuth();
+  const [cookies, setCookie] = useCookies(["room", "username"]);
+  const [loading, setLoading] = useState(true);
+  const { chosenRoom, setChosenRoom, roomInfo } = useUserStatus();
+  const [score, setScore] = useState(0);
 
+  // Sets the chosenRoom and the username cookie
+  // If the user is not logged in, redirect to the login page
+  // This also needs to handle when the page is loaded straight to a room rather than after login
   useEffect(() => {
-    if (cookies.room) {
-      setRoom(cookies.room);
-    } else {
-      // get room name from url
+    if (currentUser) {
+      setCookie("username", currentUser.email.split("@")[0], { path: "/" });
+
       var urlRegEx = new RegExp("^.*/Room/(.*)", "i");
       var urlMatch = urlRegEx.exec(window.location.href);
       if (urlMatch && urlMatch[1]) {
-        setRoom(urlMatch[1]);
+        setChosenRoom(urlMatch[1]);
+        setCookie("room", urlMatch[1], { path: "/" });
       }
-    }
-    if (cookies.username) {
-      setUsername(cookies.username);
-    }
-  }, []);
-
-  const processUrl = async (url) => {
-    var urlRegEx = new RegExp("^https://app.put.io/a-gift-from/(.*)/(.*)", "i");
-    var urlMatch = urlRegEx.exec(url);
-    if (urlMatch && urlMatch[2]) {
-      return await getPutIOVideoUrl(urlMatch[2]);
     } else {
-      return url;
+      navigate("/");
+    }
+  }, [currentUser]);
+
+  const setVideo = async () => {
+    try {
+      const roomInfoSnapshot = await roomInfo;
+      if (roomInfoSnapshot && roomInfoSnapshot.video_url) {
+        setVideoJSOptions(roomInfoSnapshot);
+      } else {
+        setVideoOptions(null);
+      }
+      setLoading(false); // End loading after the operation is done
+    } catch (error) {
+      console.error("Error setting video:", error);
+      setLoading(false); // Ensure loading ends even if there is an error
     }
   };
 
-  const getPutIOVideoUrl = async (oauthToken) => {
-    var apiUrl =
-      "https://api.put.io/v2/files/public?codecs_parent=1&media_info_parent=1&mp4_status_parent=1&mp4_stream_url_parent=1&oauth_token=" +
-      oauthToken +
-      "&stream_url_parent=1&video_metadata_parent=1";
-    var apiResponse = await fetch(apiUrl);
-    var jsonData = await apiResponse.json();
-
-    return jsonData.parent.mp4_stream_url;
-  };
-
-  const createVideoOptions = async (options) => {
-    console.log(options);
-    if (options.url) {
-      let uurl = await processUrl(options.url);
-      options.url = uurl;
+  useEffect(() => {
+    if (roomInfo) {
+      setVideo();
     }
+  }, [roomInfo]);
+
+  const setVideoJSOptions = (options) => {
     setVideoOptions({
       autoplay: true,
       controls: false,
       responsive: true,
       fluid: true,
+      playsinline: true,
       sources: [
         {
-          src: options.url ? options.url : "/test.mp4",
+          src: "/test.mp4",
           type: "video/mp4",
         },
       ],
     });
   };
 
-  if (videoOptions) {
+  if (loading || score <= 1) {
     return (
       <div>
-        <VideoJS options={videoOptions} clearVideo={setVideoOptions} />
+        <BubblePopper score={score} setScore={setScore}></BubblePopper>
       </div>
     );
   } else {
-    return <VideoOptionsPage setVideoOptions={createVideoOptions} roomName={room} />;
+    if (videoOptions == null) {
+      return <VideoOptionsPage />;
+    } else {
+      return <VideoJS options={videoOptions} />;
+    }
   }
 }
 

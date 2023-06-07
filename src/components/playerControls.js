@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoSignOut } from "react-icons/go";
 import {
   BsPlay,
@@ -10,7 +10,11 @@ import {
   BsArrowsFullscreen,
 } from "react-icons/bs";
 
+import { useUserStatus } from "../middleware/StateContext";
+
 const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo }) => {
+  const { chosenRoom, setRoomInfo, roomState, setRoomState } = useUserStatus();
+
   const [isVolumeBarVisible, setVolumeBarVisible] = useState(false);
   const [volume, setVolume] = useState(50);
   const toggleVolumeBar = () => {
@@ -44,10 +48,112 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
     const seekPercentage = (clickPosition / progressBarWidth) * 100;
     const seekTime = (seekPercentage / 100) * progress.duration;
 
+    const videoState = {
+      video_length: progress.duration,
+      video_position: seekTime,
+      last_update_time: Date.now(),
+    };
+    setRoomState(videoState);
+    // if (playerRef.current) {
+    //   playerRef.current.currentTime(seekTime);
+    // }
+  };
+
+  const [stateSnapshot, setStateSnapshot] = useState(null);
+
+  const checkPlayerReadyState = async (playerRef) => {
+    return new Promise((resolve) => {
+      const checkReadyState = setInterval(() => {
+        if (playerRef.current.readyState() > 0) {
+          clearInterval(checkReadyState);
+          resolve(true);
+        }
+      }, 100);
+    });
+  };
+
+  useEffect(() => {
+    const syncVideoState = async () => {
+      await checkPlayerReadyState(playerRef);
+      if (roomState) {
+        if (!stateSnapshot) {
+          setStateSnapshot(roomState);
+          if (roomState.is_playing) {
+            playerRef.current.play();
+          } else {
+            playerRef.current.pause();
+          }
+          // playerRef.current.currentTime = roomState.video_position || 0;
+          playerRef.current.currentTime(roomState.video_position);
+        } else if (stateSnapshot !== roomState) {
+          if (roomState.is_playing) {
+            playerRef.current.play();
+          } else if (!roomState.is_playing) {
+            playerRef.current.pause();
+          }
+          if (roomState.video_position !== progress.current) {
+            playerRef.current.currentTime(roomState.video_position);
+          }
+          setStateSnapshot(roomState);
+        }
+      }
+    };
+
+    syncVideoState();
+  }, [roomState, playerRef]);
+
+  const play = () => {
     if (playerRef.current) {
-      playerRef.current.currentTime(seekTime);
+      // playerRef.current.play();
+      const videoState = {
+        is_playing: true,
+        video_length: progress.duration,
+        video_position: progress.current,
+        last_update_time: Date.now(),
+      };
+      setRoomState(videoState);
     }
   };
+
+  const pause = () => {
+    if (playerRef.current) {
+      // playerRef.current.pause();
+      const videoState = {
+        is_playing: false,
+        video_length: progress.duration,
+        video_position: progress.current,
+        last_update_time: Date.now(),
+      };
+      setRoomState(videoState);
+    }
+  };
+
+  const rewind = () => {
+    if (playerRef.current) {
+      const newTime = playerRef.current.currentTime() - 5;
+      // playerRef.current.currentTime(newTime);
+      const videoState = {
+        video_length: progress.duration,
+        video_position: newTime,
+        last_update_time: Date.now(),
+      };
+      setRoomState(videoState);
+    }
+  };
+
+  const ff = () => {
+    if (playerRef.current) {
+      const newTime = playerRef.current.currentTime() + 5;
+      // playerRef.current.currentTime(newTime);
+      const videoState = {
+        video_length: progress.duration,
+        video_position: newTime,
+        last_update_time: Date.now(),
+      };
+      setRoomState(videoState);
+    }
+  };
+
   return (
     <>
       <div className="bg-slate-600 w-full dark:bg-slate-900">
@@ -78,19 +184,24 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
             <GoSignOut color="slate-800" className="dark:text-slate-300" />
           </button>
           <button
-            onClick={() => playerRef.current && playerRef.current.play()}
+            onClick={play}
             className="flex items-center justify-center w-12 h-12 bg-slate-600 border-l border-b border-r border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
             <BsPlay color="slate-800" className="dark:text-slate-300" />
           </button>
           <button
             className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
-            onClick={() => playerRef.current && playerRef.current.pause()}>
+            onClick={pause}>
             <BsPause color="slate-800" className="dark:text-slate-300" />
           </button>
           <button className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
             <BsTrash3
               onClick={() => {
-                clearVideo();
+                setRoomInfo({
+                  video_name: "",
+                  video_url: "",
+                  subtitle_url: "",
+                  room_password: "",
+                });
               }}
               color="slate-800"
               className="dark:text-slate-300"
@@ -98,12 +209,12 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
           </button>
           <button
             className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
-            onClick={() => playerRef.current && playerRef.current.currentTime(playerRef.current.currentTime() - 5)}>
+            onClick={rewind}>
             <BsSkipBackward color="slate-800" className="dark:text-slate-300" />
           </button>
           <button
             className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
-            onClick={() => playerRef.current && playerRef.current.currentTime(playerRef.current.currentTime() + 5)}>
+            onClick={ff}>
             <BsSkipForward color="slate-800" className="dark:text-slate-300" />
           </button>
           <button className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 ">

@@ -5,23 +5,14 @@ import "tailwindcss/tailwind.css";
 import "./VideoPlayer.css"; // Import the custom CSS file
 import { useNavigate } from "react-router-dom";
 import PlayerControls from "./playerControls";
-
-import {
-  BsArrowsFullscreen,
-  BsPlay,
-  BsTrash3,
-  BsPause,
-  BsVolumeDown,
-  BsSkipForward,
-  BsSkipBackward,
-} from "react-icons/bs";
-import { GoSignOut } from "react-icons/go";
+import { useUserStatus } from "../middleware/StateContext";
 
 export const VideoJS = (props) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
+  const { chosenRoom, setRoomInfo, roomState, setRoomState } = useUserStatus();
 
   // Define state for video progress
   const [progress, setProgress] = useState({ current: 0, duration: 0, percentage: 0 });
@@ -39,6 +30,8 @@ export const VideoJS = (props) => {
 
       const player = (playerRef.current = videojs(videoElement, options, () => {
         videojs.log("player is ready");
+        // playerRef.current.pause(); // pause the player initially
+        // playerRef.current.currentTime(roomState.video_position || 0); // set the initial time position
         onReady && onReady(player);
       }));
 
@@ -49,6 +42,11 @@ export const VideoJS = (props) => {
           percentage: (player.currentTime() / player.duration()) * 100,
         });
       });
+
+      // This ensures the video is paused once it's ready
+      // player.ready(function () {
+      //   player.pause();
+      // });
     } else {
       const player = playerRef.current;
 
@@ -91,6 +89,8 @@ export const VideoJS = (props) => {
         ref={videoRef}
         className="w-full aspect-[16/9] max-h-screen object-cover"
         style={{ maxWidth: "calc(100vh * 16 / 9)" }}
+        autoPlay={true}
+        playsInline={true}
       />
       <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
         {/* <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100 transition-opacity duration-200"> */}

@@ -4,12 +4,16 @@ import React from "react";
 
 import { AuthProvider } from "../middleware/AuthContext";
 
+import { UserStateProvider } from "../middleware/StateContext";
+
 export default function Root() {
   return (
     <>
       <AuthProvider>
-        {/* <Navigation /> */}
-        <Outlet />
+        <UserStateProvider>
+          {/* <Navigation /> */}
+          <Outlet />
+        </UserStateProvider>
       </AuthProvider>
     </>
   );
