@@ -15,16 +15,12 @@ import { useUserStatus } from "../middleware/StateContext";
 const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo }) => {
   const { chosenRoom, setRoomInfo, roomState, setRoomState } = useUserStatus();
 
-  const [isVolumeBarVisible, setVolumeBarVisible] = useState(false);
   const [volume, setVolume] = useState(50);
-  const toggleVolumeBar = () => {
-    setVolumeBarVisible(!isVolumeBarVisible);
-  };
   const changeVolume = (event) => {
     const newVolume = event.target.value;
     setVolume(newVolume);
     if (playerRef.current) {
-      playerRef.current.volume = newVolume / 100;
+      playerRef.current.volume(newVolume / 100);
     }
   };
 
@@ -54,9 +50,6 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
       last_update_time: Date.now(),
     };
     setRoomState(videoState);
-    // if (playerRef.current) {
-    //   playerRef.current.currentTime(seekTime);
-    // }
   };
 
   const [stateSnapshot, setStateSnapshot] = useState(null);
@@ -68,14 +61,31 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
           clearInterval(checkReadyState);
           resolve(true);
         }
-      }, 100);
+      }, 50);
     });
   };
+
+  const [msOffset, setMsOffset] = useState(0);
+
+  useEffect(() => {
+    if (stateSnapshot) {
+      // ideal video position
+      const currentTimeInMs = new Date().getTime();
+      const lastUpdateTimeInMs = roomState.last_update_time;
+      const offsetInSeconds = (currentTimeInMs - lastUpdateTimeInMs) / 1000;
+      const videoPosition = roomState.video_position || 0;
+      const newVideoPosition = videoPosition + offsetInSeconds;
+
+      // Update the msOffset state
+      setMsOffset(newVideoPosition - progress.current);
+    }
+  }, [stateSnapshot, progress.current]);
 
   useEffect(() => {
     const syncVideoState = async () => {
       await checkPlayerReadyState(playerRef);
       if (roomState) {
+        // this means its a first load
         if (!stateSnapshot) {
           setStateSnapshot(roomState);
           if (roomState.is_playing) {
@@ -83,8 +93,12 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
           } else {
             playerRef.current.pause();
           }
-          // playerRef.current.currentTime = roomState.video_position || 0;
-          playerRef.current.currentTime(roomState.video_position);
+          const currentTimeInMs = new Date().getTime();
+          const lastUpdateTimeInMs = roomState.last_update_time;
+          const offsetInSeconds = (currentTimeInMs - lastUpdateTimeInMs) / 1000;
+          const videoPosition = roomState.video_position || 0;
+          const newVideoPosition = videoPosition + offsetInSeconds;
+          playerRef.current.currentTime(newVideoPosition);
         } else if (stateSnapshot !== roomState) {
           if (roomState.is_playing) {
             playerRef.current.play();
@@ -201,6 +215,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
                   video_url: "",
                   subtitle_url: "",
                   room_password: "",
+                  video_info: {},
                 });
               }}
               color="slate-800"
@@ -219,6 +234,13 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
           </button>
           <button className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 ">
             {formatTime(progress.current)} / {formatTime(progress.duration)}
+          </button>
+          <button
+            onClick={() => {
+              playerRef.current.currentTime(progress.current + msOffset);
+            }}
+            className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12  bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 ">
+            {msOffset}
           </button>
           <span className="ml-2 whitespace-nowrap overflow-ellipsis overflow-hidden "></span>
           {/* End of button row */}

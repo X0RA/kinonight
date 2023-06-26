@@ -56,8 +56,16 @@ function Room() {
     }
   }, [roomInfo]);
 
-  const setVideoJSOptions = (options) => {
-    setVideoOptions({
+  const setVideoJSOptions = async (options) => {
+    let videoUrl = await processUrl(options.video_url);
+    console.log(videoUrl);
+    // if video url is still valid then set the options else stop this process
+    if (!videoUrl.status) {
+      return;
+    }
+
+    //set the options
+    var opts = {
       autoplay: true,
       controls: false,
       responsive: true,
@@ -65,11 +73,25 @@ function Room() {
       playsinline: true,
       sources: [
         {
-          src: "/test.mp4",
+          src: videoUrl.url,
           type: "video/mp4",
         },
       ],
-    });
+    };
+
+    if (options.subtitle_url) {
+      opts.tracks = [
+        {
+          kind: "captions",
+          label: "English",
+          src: options.subtitle_url,
+          srclang: "en",
+          default: true,
+        },
+      ];
+    }
+
+    setVideoOptions(opts);
   };
 
   if (loading || score <= 1) {
@@ -82,7 +104,12 @@ function Room() {
     if (videoOptions == null) {
       return <VideoOptionsPage />;
     } else {
-      return <VideoJS options={videoOptions} />;
+      return (
+        <>
+          {/* {roomInfo && roomInfo.video_info && <SideInfo videoInfo={roomInfo} />} */}
+          <VideoJS options={videoOptions} />
+        </>
+      );
     }
   }
 }
