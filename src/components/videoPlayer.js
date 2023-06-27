@@ -12,7 +12,7 @@ export const VideoJS = (props) => {
   const playerRef = useRef(null);
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
-  const { chosenRoom, setRoomInfo, roomState, setRoomState } = useUserStatus();
+  const { chosenRoom, setRoomInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
 
   // Define state for video progress
   const [progress, setProgress] = useState({ current: 0, duration: 0, percentage: 0 });
@@ -57,6 +57,7 @@ export const VideoJS = (props) => {
 
   const logOut = () => {
     document.cookie = "room=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setVideoOptions(null);
     Navigate("/");
   };
 

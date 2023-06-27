@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, onValue, set, onDisconnect } from "firebase/database";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBeHgLFSWCEnMJNAdX3c3ZUpl9DkTKSJp4",
   authDomain: "movietinder-aed43.firebaseapp.com",
@@ -14,14 +13,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
-// gives us an auth instance
 const auth = getAuth(app);
-
-// Initialize the Firebase Real-time Database
 const db = getDatabase();
-
-// in order to use this auth instance elsewhere
 export default auth;
-
 export { db };

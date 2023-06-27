@@ -1,10 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import { BrowserRouter, Routes, Route, createHashRouter, RouterProvider } from "react-router-dom";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 
 import Root from "./pages/root";
-// import About from "./pages/about";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/index";
 import Room from "./pages/room";

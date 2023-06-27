@@ -43,15 +43,18 @@ const getYoutubeVideoUrl = async (url) => {
     const response = await fetch(`https://movie-api.duckdns.org:3005/geturl?vidurl=${encodeURIComponent(url)}`, {
       mode: "cors",
     });
-    if (response.status !== 200) {
-      return { status: false, error: "not a valid URL" };
-    } else if (!response.ok) {
-      throw new Error("Failed to fetch movie data");
-    }
+
     const data = await response.json();
-    return { status: true, url: data.url };
+
+    if (response.status !== 200) {
+      // Here we assume the API will return an error message under `message` key in case of an error
+      return { status: false, error: data.message || "Unknown error occurred" };
+    }
+
+    return { status: true, url: data.data.url };
   } catch (error) {
     console.error(error);
+    return { status: false, error: "Error while fetching video URL" };
   }
 };
 

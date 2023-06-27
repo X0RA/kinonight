@@ -157,6 +157,8 @@ export const UserStateProvider = ({ children }) => {
   const [chosenRoom, setChosenRoom] = useState(null);
   const [roomInfo, setRoomInfo] = useState(null);
   const [roomState, setRoomState] = useState(null);
+  const [videoOptions, setVideoOptions] = useState(null);
+
   useUserPresence(chosenRoom);
   const connectedUsers = useRoomUsers(chosenRoom);
   useSetRoomInfo(chosenRoom, roomInfo);
@@ -172,6 +174,8 @@ export const UserStateProvider = ({ children }) => {
     setRoomInfo,
     roomState,
     setRoomState,
+    videoOptions,
+    setVideoOptions,
   };
 
   return <UserStateContext.Provider value={value}>{children}</UserStateContext.Provider>;

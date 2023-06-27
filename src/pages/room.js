@@ -1,20 +1,22 @@
-import { VideoJS } from "../components/videoPlayer";
 import React, { useState, useEffect } from "react";
-import { useCookies } from "react-cookie";
-import VideoOptionsPage from "../components/videoOptions";
-import { useUserStatus } from "../middleware/StateContext";
-import { processUrl } from "../components/helpers";
-import { useAuth } from "../middleware/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { VideoJS } from "../components/videoPlayer";
+import VideoOptionsPage from "../components/videoOptions";
+import { processUrl } from "../components/helpers";
 import BubblePopper from "../components/bubblePopper";
+
+import { useAuth } from "../middleware/AuthContext";
+import { useUserStatus } from "../middleware/StateContext";
 
 function Room() {
   const navigate = useNavigate();
-  const [videoOptions, setVideoOptions] = useState(null);
   const { currentUser } = useAuth();
+
+  // const [videoOptions, setVideoOptions] = useState(null);
   const [cookies, setCookie] = useCookies(["room", "username"]);
   const [loading, setLoading] = useState(true);
-  const { chosenRoom, setChosenRoom, roomInfo } = useUserStatus();
+  const { chosenRoom, setChosenRoom, roomInfo, videoOptions, setVideoOptions } = useUserStatus();
   const [score, setScore] = useState(0);
 
   // Sets the chosenRoom and the username cookie
