@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import "./index.css";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
@@ -7,6 +7,9 @@ import Root from "./pages/root";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/index";
 import Room from "./pages/room";
+import SubtitleUploadPage from "./pages/SubtitleUploadPage";
+
+import EmojiReactions from "./components/emojiReact";
 
 const router = createHashRouter([
   {
@@ -21,6 +24,14 @@ const router = createHashRouter([
       {
         path: "Room/:roomName",
         element: <Room />,
+      },
+      {
+        path: "subtitleUpload",
+        element: <SubtitleUploadPage />,
+      },
+      {
+        path: "emoji",
+        element: <EmojiReactions />,
       },
     ],
   },

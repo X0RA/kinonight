@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 
 import auth from "./Firebase";
 
@@ -11,7 +11,33 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
+  const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // clock logic
+  const [clockDrift, setClockDrift] = useState(0);
+
+  // This function fetches the actual UTC time and calculates the clock drift
+  const fetchClockDrift = async () => {
+    try {
+      let response = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC.json");
+      let data = await response.json();
+      let actualTime = data.unixtime * 1000; // Convert to milliseconds
+      setClockDrift(actualTime - Date.now());
+    } catch (error) {
+      console.error("Error fetching UTC time:", error);
+    }
+  };
+
+  // This function returns the adjusted UTC time based on the clock drift
+  const utcTime = () => {
+    return Date.now() + clockDrift;
+  };
+
+  useEffect(() => {
+    // Fetch clock drift when the component mounts
+    fetchClockDrift();
+  }, []);
 
   function register(email, password) {
     return createUserWithEmailAndPassword(auth, email, password);
@@ -21,29 +47,35 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
+  function setUsername(username) {
+    return updateProfile(auth.currentUser, {
+      displayName: username,
+    });
+  }
+
   async function loginOrSignUp(email, password) {
     try {
-      try {
-        await login(email, password);
-      } catch (error) {
-        if (error.code === "auth/user-not-found") {
-          await register(email, password);
-        } else {
-          throw error;
-        }
-      }
+      await login(email, password);
       return { status: true };
     } catch (error) {
-      console.error(error); // Optionally log the error.
-
-      let errorMessage = "An error occurred.";
-      if (error.code === "auth/user-not-found") {
-        errorMessage = "Account does not exist.";
-      } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Wrong password.";
-      } // Add more conditions for other error codes if needed.
-
-      return { status: false, message: errorMessage };
+      if (error.code === "auth/user-not-found" || error.code == "auth/invalid-login-credentials") {
+        try {
+          await register(email, password);
+          return { status: true };
+        } catch (signupError) {
+          console.error(signupError);
+          return { status: false, message: signupError.message };
+        }
+      } else {
+        console.error(error);
+        let errorMessage = "An error occurred during login.";
+        if (error.code === "auth/wrong-password") {
+          errorMessage = "Wrong password.";
+        } else {
+          errorMessage = error.message;
+        }
+        return { status: false, message: errorMessage };
+      }
     }
   }
 
@@ -65,7 +97,9 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
-    loginOrSignUp, // add this line
+    loginOrSignUp,
+    setUsername,
+    utcTime,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

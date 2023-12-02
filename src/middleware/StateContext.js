@@ -87,34 +87,34 @@ const useRoomUsers = (chosenRoom) => {
   return connectedUsers;
 };
 
-const useSetRoomInfo = (chosenRoom, newInfo) => {
+const useSetVideoInfo = (chosenRoom, newInfo) => {
   useEffect(() => {
     if (chosenRoom && newInfo) {
       const db = getDatabase();
-      const roomInfoRef = ref(db, `/rooms/${chosenRoom}/video_info`);
-      update(roomInfoRef, newInfo).catch((error) => {
+      const videoInfoRef = ref(db, `/rooms/${chosenRoom}/video_info`);
+      update(videoInfoRef, newInfo).catch((error) => {
         console.log("Error updating room info: ", error);
       });
     }
   }, [chosenRoom, newInfo]);
 };
 
-const useGetRoomInfo = (chosenRoom, callback) => {
+const useGetVideoInfo = (chosenRoom, callback) => {
   useEffect(() => {
     if (chosenRoom && callback) {
       const db = getDatabase();
-      const roomInfoRef = ref(db, `/rooms/${chosenRoom}/video_info`);
+      const videoInfoRef = ref(db, `/rooms/${chosenRoom}/video_info`);
 
-      onValue(roomInfoRef, (snapshot) => {
-        let roomInfo = snapshot.val();
-        if (roomInfo === null) {
-          roomInfo = {};
+      onValue(videoInfoRef, (snapshot) => {
+        let videoInfo = snapshot.val();
+        if (videoInfo === null) {
+          videoInfo = {};
         }
-        callback(roomInfo);
+        callback(videoInfo);
       });
 
       // Clean up listener on unmount
-      return () => off(roomInfoRef, "value");
+      return () => off(videoInfoRef, "value");
     }
   }, [chosenRoom, callback]);
 };
@@ -153,29 +153,69 @@ const useGetStateInfo = (chosenRoom, callback) => {
   }, [chosenRoom, callback]);
 };
 
+const useSetRoomInfo = (chosenRoom, newInfo) => {
+  useEffect(() => {
+    if (chosenRoom && newInfo) {
+      const db = getDatabase();
+      const roomInfoRef = ref(db, `/rooms/${chosenRoom}/room_info`);
+
+      update(roomInfoRef, newInfo).catch((error) => {
+        console.log("Error updating room info: ", error);
+      });
+    }
+  }, [chosenRoom, newInfo]);
+};
+
+const useGetRoomInfo = (chosenRoom, callback) => {
+  useEffect(() => {
+    if (chosenRoom && callback) {
+      const db = getDatabase();
+      const roomInfoRef = ref(db, `/rooms/${chosenRoom}/room_info`);
+
+      onValue(roomInfoRef, (snapshot) => {
+        let roomInfo = snapshot.val();
+        // Check if roomInfo is null and replace it with an empty object
+        if (roomInfo === null) {
+          roomInfo = {};
+        }
+        callback(roomInfo);
+      });
+
+      // Clean up listener on unmount
+      return () => off(roomInfoRef, "value");
+    }
+  }, [chosenRoom, callback]);
+};
+
 export const UserStateProvider = ({ children }) => {
   const [chosenRoom, setChosenRoom] = useState(null);
-  const [roomInfo, setRoomInfo] = useState(null);
+  const [videoInfo, setVideoInfo] = useState(null);
   const [roomState, setRoomState] = useState(null);
   const [videoOptions, setVideoOptions] = useState(null);
+  const [roomInfo, setRoomInfo] = useState(null);
 
   useUserPresence(chosenRoom);
   const connectedUsers = useRoomUsers(chosenRoom);
-  useSetRoomInfo(chosenRoom, roomInfo);
-  useGetRoomInfo(chosenRoom, setRoomInfo);
+  useSetVideoInfo(chosenRoom, videoInfo);
+  useGetVideoInfo(chosenRoom, setVideoInfo);
   useSetStateInfo(chosenRoom, roomState);
   useGetStateInfo(chosenRoom, setRoomState);
+
+  useSetRoomInfo(chosenRoom, roomInfo);
+  useGetRoomInfo(chosenRoom, setRoomInfo);
 
   const value = {
     chosenRoom,
     setChosenRoom,
     connectedUsers,
-    roomInfo,
-    setRoomInfo,
+    videoInfo,
+    setVideoInfo,
     roomState,
     setRoomState,
     videoOptions,
     setVideoOptions,
+    roomInfo,
+    setRoomInfo,
   };
 
   return <UserStateContext.Provider value={value}>{children}</UserStateContext.Provider>;

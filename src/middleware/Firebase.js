@@ -3,13 +3,13 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, onValue, set, onDisconnect } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBeHgLFSWCEnMJNAdX3c3ZUpl9DkTKSJp4",
-  authDomain: "movietinder-aed43.firebaseapp.com",
-  databaseURL: "https://movietinder-aed43-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "movietinder-aed43",
-  storageBucket: "movietinder-aed43.appspot.com",
-  messagingSenderId: "1053985809671",
-  appId: "1:1053985809671:web:975387d104507d7b73d1a2",
+  apiKey: "AIzaSyBYykXDfsZCaGlPCriFRI5pwyJwXG_QuhI",
+  authDomain: "xkiinonight.firebaseapp.com",
+  databaseURL: "https://xkiinonight-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "xkiinonight",
+  storageBucket: "xkiinonight.appspot.com",
+  messagingSenderId: "706285262897",
+  appId: "1:706285262897:web:6ed5fc8b534c82e6991d10",
 };
 
 const app = initializeApp(firebaseConfig);

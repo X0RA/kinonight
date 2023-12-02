@@ -4,111 +4,136 @@ import { useCookies } from "react-cookie";
 import { VideoJS } from "../components/videoPlayer";
 import VideoOptionsPage from "../components/videoOptions";
 import { processUrl } from "../components/helpers";
-import BubblePopper from "../components/bubblePopper";
 
 import { useAuth } from "../middleware/AuthContext";
 import { useUserStatus } from "../middleware/StateContext";
+import { uploadFile } from "../middleware/Storage";
+import { set } from "@firebase/database";
+
+import EmojiReactions from "../components/emojiReact";
 
 function Room() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-
-  // const [videoOptions, setVideoOptions] = useState(null);
   const [cookies, setCookie] = useCookies(["room", "username"]);
   const [loading, setLoading] = useState(true);
-  const { chosenRoom, setChosenRoom, roomInfo, videoOptions, setVideoOptions } = useUserStatus();
-  const [score, setScore] = useState(0);
+  const { chosenRoom, setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
+  const [userInteraction, setUserInteraction] = useState(false);
 
-  // Sets the chosenRoom and the username cookie
-  // If the user is not logged in, redirect to the login page
-  // This also needs to handle when the page is loaded straight to a room rather than after login
+  // Redirects to the login page if the user is not logged in
   useEffect(() => {
-    if (currentUser) {
-      setCookie("username", currentUser.email.split("@")[0], { path: "/" });
-
-      var urlRegEx = new RegExp("^.*/Room/(.*)", "i");
-      var urlMatch = urlRegEx.exec(window.location.href);
-      if (urlMatch && urlMatch[1]) {
-        setChosenRoom(urlMatch[1]);
-        setCookie("room", urlMatch[1], { path: "/" });
-      }
-    } else {
+    if (!currentUser) {
+      setCookie("room", extractRoomNameFromURL(window.location.href), { path: "/", sameSite: "Strict" });
       navigate("/");
+      return;
     }
-  }, [currentUser]);
+    setCookieForCurrentUser(currentUser);
+    setRoomFromURL();
+  }, [currentUser, navigate, setCookie]);
 
-  const setVideo = async () => {
-    try {
-      const roomInfoSnapshot = await roomInfo;
-      if (roomInfoSnapshot && roomInfoSnapshot.video_url) {
-        setVideoJSOptions(roomInfoSnapshot);
-      } else {
-        setVideoOptions(null);
-      }
-      setLoading(false); // End loading after the operation is done
-    } catch (error) {
-      console.error("Error setting video:", error);
-      setLoading(false); // Ensure loading ends even if there is an error
+  // Sets a cookie for the current user's username
+  const setCookieForCurrentUser = (currentUser) => {
+    const username = currentUser.email.split("@")[0];
+    setCookie("username", username, { path: "/", sameSite: "Strict" });
+  };
+
+  // Extracts the room name from the URL and updates the chosenRoom state and cookie
+  const setRoomFromURL = () => {
+    const roomName = extractRoomNameFromURL(window.location.href);
+    if (roomName) {
+      setChosenRoom(roomName);
+      setCookie("room", roomName, { path: "/", sameSite: "Strict" });
     }
   };
 
+  // Helper function to extract room name from URL
+  const extractRoomNameFromURL = (url) => {
+    const urlRegEx = new RegExp("/Room/(.*)", "i");
+    const urlMatch = urlRegEx.exec(url);
+    return urlMatch && urlMatch[1] ? urlMatch[1] : null;
+  };
+
+  // Sets video options based on videoInfo
   useEffect(() => {
-    if (roomInfo) {
+    if (videoInfo) {
       setVideo();
     }
-  }, [roomInfo]);
+  }, [videoInfo]);
 
+  const setVideo = async () => {
+    try {
+      if (videoInfo && videoInfo.video_url) {
+        await setVideoJSOptions(videoInfo);
+      } else {
+        setVideoOptions(null);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error setting video:", error);
+      setLoading(false);
+    }
+  };
+
+  // Configures video player options
   const setVideoJSOptions = async (options) => {
     let videoUrl = await processUrl(options.video_url);
-    console.log(videoUrl);
-    // if video url is still valid then set the options else stop this process
     if (!videoUrl.status) {
       return;
     }
 
-    //set the options
-    var opts = {
+    const opts = createVideoOptions(videoUrl.url, options.subtitle_url);
+    setVideoOptions(opts);
+  };
+
+  // Helper to create video player options
+  const createVideoOptions = (videoUrl, subtitleUrl) => {
+    const opts = {
       autoplay: true,
       controls: false,
       responsive: true,
       fluid: true,
       playsinline: true,
-      sources: [
-        {
-          src: videoUrl.url,
-          type: "video/mp4",
-        },
-      ],
+      sources: [{ src: videoUrl, type: "video/mp4" }],
     };
 
-    if (options.subtitle_url) {
+    if (subtitleUrl) {
       opts.tracks = [
         {
           kind: "captions",
           label: "English",
-          src: options.subtitle_url,
+          src: subtitleUrl,
           srclang: "en",
           default: true,
         },
       ];
     }
 
-    setVideoOptions(opts);
+    return opts;
   };
 
-  if (loading || score <= 1) {
-    return (
-      <div>
-        <BubblePopper score={score} setScore={setScore}></BubblePopper>
-      </div>
-    );
+  if (videoOptions == null) {
+    return <VideoOptionsPage />;
   } else {
-    if (videoOptions == null) {
-      return <VideoOptionsPage />;
+    if (userInteraction == false) {
+      return (
+        <>
+          <div className="flex flex-col items-center justify-center h-screen bg-primary-400">
+            <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-primary-200 rounded-lg">
+              <h1 className="text-2xl font-bold">Welcome to the room!</h1>
+              <p className="text-xl text-center pt-4 pb-4">
+                This is a button so the browser is like "yeah he can load a video" or something idk.
+              </p>
+              <button onClick={() => setUserInteraction(true)} className="w-1/4 h-1/6 bg-primary-400 rounded-lg">
+                Lets watch kino!
+              </button>
+            </div>
+          </div>
+        </>
+      );
     } else {
       return (
         <>
-          {/* {roomInfo && roomInfo.video_info && <SideInfo videoInfo={roomInfo} />} */}
+          <EmojiReactions />
           <VideoJS options={videoOptions} />
         </>
       );

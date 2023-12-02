@@ -12,7 +12,7 @@ export const VideoJS = (props) => {
   const playerRef = useRef(null);
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
-  const { chosenRoom, setRoomInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
+  const { chosenRoom, setVideoInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
 
   // Define state for video progress
   const [progress, setProgress] = useState({ current: 0, duration: 0, percentage: 0 });
@@ -42,11 +42,6 @@ export const VideoJS = (props) => {
           percentage: (player.currentTime() / player.duration()) * 100,
         });
       });
-
-      // This ensures the video is paused once it's ready
-      // player.ready(function () {
-      //   player.pause();
-      // });
     } else {
       const player = playerRef.current;
 

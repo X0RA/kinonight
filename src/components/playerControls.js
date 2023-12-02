@@ -8,48 +8,170 @@ import {
   BsSkipForward,
   BsVolumeDown,
   BsArrowsFullscreen,
+  BsLockFill,
+  BsLock,
+  BsEmojiAngry,
 } from "react-icons/bs";
-
+import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
+import { useAuth } from "../middleware/AuthContext";
+import EmojiPicker from "emoji-picker-react";
+import { Theme } from "emoji-picker-react";
 
 const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo }) => {
-  const { chosenRoom, setRoomInfo, roomState, setRoomState } = useUserStatus();
+  const [cookies, setCookie] = useCookies(["roompw", "volumepercent"]);
+  const { chosenRoom, setVideoInfo, roomState, setRoomState, videoInfo, roomInfo, setRoomInfo } = useUserStatus();
+  const { utcTime} = useUserStatus();
 
-  const [volume, setVolume] = useState(50);
+  // lock controls
+  const [isLocked, setIsLocked] = useState(true);
+  const [roomIsLocked, setRoomIsLocked] = useState(true);
+  const [showLockDialog, setShowLockDialog] = useState(false);
+  const [lockPassword, setLockPassword] = useState("");
+  const [showUnlockDiaglog, setShowUnlockDialog] = useState(false);
+
+  const setPasswordLock = async () => {
+    try {
+      setCookie("roompw", chosenRoom + ":" + lockPassword, { path: "/", sameSite: "Strict" });
+      await setRoomInfo({
+        ...roomInfo,
+        room_password: lockPassword,
+      });
+      setRoomIsLocked(true);
+    } catch (error) {
+      console.error("Error setting lock password:", error);
+    }
+  };
+
+  const attemptUnlock = async () => {
+    try {
+      if (lockPassword == roomInfo.room_password) {
+        setCookie("roompw", chosenRoom + ":" + lockPassword, { path: "/", sameSite: "Strict" });
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error("Error verifying lock password:", error);
+    }
+  };
+
+  const unlockControls = async () => {
+    try {
+      setCookie("roompw", chosenRoom + ":" + "", { path: "/", sameSite: "Strict" });
+      setLockPassword("");
+      await setRoomInfo({
+        ...roomInfo,
+        room_password: "",
+      });
+      setIsLocked(false);
+      setRoomIsLocked(false);
+    } catch (error) {
+      console.error("Error setting lock password:", error);
+    }
+  };
+
+  useEffect(() => {
+    let cookie = "";
+    if (cookies["roompw"]) {
+      cookie = cookies["roompw"].split(":")[1];
+    }
+    const checkLockStatus = async () => {
+      try {
+        const userLockStatus =
+          lockPassword == roomInfo.room_password ||
+          roomInfo.room_password == "" ||
+          cookie == roomInfo.room_password ||
+          roomInfo.room_password === undefined;
+        setIsLocked(!userLockStatus);
+        setRoomIsLocked(roomInfo.room_password != "");
+      } catch (error) {
+        console.error("Error verifying lock password:", error);
+      }
+    };
+
+    checkLockStatus();
+  }, [roomInfo, lockPassword]);
+
+  // Emoji picker controls
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+
+  const pushEmoji = (emoji) => {
+    setRoomInfo({
+      ...roomInfo, // keep the old room info
+      reactionEmoji: emoji + ":" + Math.random().toString(36).substr(2, 9),
+    });
+  };
+
+  // Volume logic
+  const [volume, setVolume] = useState();
   const changeVolume = (event) => {
     const newVolume = event.target.value;
+    setCookie("volumepercent", newVolume, { path: "/", sameSite: "Strict" });
     setVolume(newVolume);
     if (playerRef.current) {
       playerRef.current.volume(newVolume / 100);
     }
   };
 
+  useEffect(() => {
+    console.log("setting volume");
+    if (cookies["volumepercent"]) {
+      setVolume(cookies["volumepercent"]);
+    } else {
+      setVolume(100);
+    }
+  }, [playerRef]);
+
   const requestFullscreen = () => {
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
-    } else if (document.documentElement.mozRequestFullScreen) {
-      document.documentElement.mozRequestFullScreen();
-    } else if (document.documentElement.webkitRequestFullscreen) {
-      document.documentElement.webkitRequestFullscreen();
-    } else if (document.documentElement.msRequestFullscreen) {
-      document.documentElement.msRequestFullscreen();
+    const doc = document.documentElement;
+
+    // Check if full-screen mode is already active
+    if (
+      document.fullscreenElement ||
+      document.mozFullScreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement
+    ) {
+      // Exit full-screen mode
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    } else {
+      // Enter full-screen mode
+      if (doc.requestFullscreen) {
+        doc.requestFullscreen();
+      } else if (doc.mozRequestFullScreen) {
+        doc.mozRequestFullScreen();
+      } else if (doc.webkitRequestFullscreen) {
+        doc.webkitRequestFullscreen();
+      } else if (doc.msRequestFullscreen) {
+        doc.msRequestFullscreen();
+      }
     }
   };
-
   const handleProgressBarClick = (event) => {
-    const progressBar = event.currentTarget;
-    const progressBarRect = progressBar.getBoundingClientRect();
-    const clickPosition = event.clientX - progressBarRect.left;
-    const progressBarWidth = progressBarRect.width;
-    const seekPercentage = (clickPosition / progressBarWidth) * 100;
-    const seekTime = (seekPercentage / 100) * progress.duration;
+    if (!isLocked) {
+      const progressBar = event.currentTarget;
+      const progressBarRect = progressBar.getBoundingClientRect();
+      const clickPosition = event.clientX - progressBarRect.left;
+      const progressBarWidth = progressBarRect.width;
+      const seekPercentage = (clickPosition / progressBarWidth) * 100;
+      const seekTime = (seekPercentage / 100) * progress.duration;
 
-    const videoState = {
-      video_length: progress.duration,
-      video_position: seekTime,
-      last_update_time: Date.now(),
-    };
-    setRoomState(videoState);
+      const videoState = {
+        video_length: progress.duration,
+        video_position: seekTime,
+        last_update_time: Date.now(),
+      };
+      setRoomState(videoState);
+    }
   };
 
   const [stateSnapshot, setStateSnapshot] = useState(null);
@@ -66,6 +188,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
   };
 
   const [msOffset, setMsOffset] = useState(0);
+  const [msOffsetMessage, setMsOffsetMessage] = useState("");
 
   useEffect(() => {
     if (stateSnapshot) {
@@ -76,8 +199,14 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
       const videoPosition = roomState.video_position || 0;
       const newVideoPosition = videoPosition + offsetInSeconds;
 
-      // Update the msOffset state
-      setMsOffset(newVideoPosition - progress.current);
+      // Update the msOffset state with two decimal places
+      const offsetFormatted = +(newVideoPosition - progress.current).toFixed(2);
+      setMsOffset(offsetFormatted);
+      if (offsetFormatted > 1.1 || offsetFormatted < -1.1) {
+        setMsOffsetMessage(`Out of sync (${offsetFormatted}))`);
+      } else {
+        setMsOffsetMessage("In Sync");
+      }
     }
   }, [stateSnapshot, progress.current]);
 
@@ -193,45 +322,209 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
         {/* Bottom buttons */}
         <div className="flex space-x-0 justify-start h-12 w-full">
           <button
-            className="flex items-center justify-center w-12 h-12 bg-slate-600 border-b border-l border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
+            className={`flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800${
+              isLocked ? "border-l border-b border-r" : "border-b  "
+            }`}
             onClick={logOut}>
             <GoSignOut color="slate-800" className="dark:text-slate-300" />
           </button>
+          {!isLocked && (
+            <>
+              {/* play button */}
+              <button
+                onClick={play}
+                className="flex items-center justify-center w-12 h-12 bg-slate-600 border-l border-b border-r border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
+                <BsPlay color="slate-800" className="dark:text-slate-300" />
+              </button>
+
+              {/* pause button */}
+              <button
+                className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
+                onClick={pause}>
+                <BsPause color="slate-800" className="dark:text-slate-300" />
+              </button>
+
+              <button className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
+                <BsTrash3
+                  onClick={() => {
+                    setVideoInfo({
+                      video_name: "",
+                      video_url: "",
+                      subtitle_url: "",
+                      room_password: "",
+                      video_info: {},
+                    });
+                  }}
+                  color="slate-800"
+                  className="dark:text-slate-300"
+                />
+              </button>
+              <button
+                className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
+                onClick={rewind}>
+                <BsSkipBackward color="slate-800" className="dark:text-slate-300" />
+              </button>
+              <button
+                className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
+                onClick={ff}>
+                <BsSkipForward color="slate-800" className="dark:text-slate-300" />
+              </button>
+            </>
+          )}
+          {/* lock the controls */}
           <button
-            onClick={play}
-            className="flex items-center justify-center w-12 h-12 bg-slate-600 border-l border-b border-r border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
-            <BsPlay color="slate-800" className="dark:text-slate-300" />
+            className={`flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 border-r border-b`}
+            onClick={() => {
+              if (!isLocked) {
+                setShowLockDialog(true);
+              } else {
+                setShowUnlockDialog(true);
+              }
+            }}>
+            <BsLockFill color="slate-800" className={`${roomIsLocked ? "text-secondary-300" : "text-emerald-300"}`} />
           </button>
-          <button
-            className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
-            onClick={pause}>
-            <BsPause color="slate-800" className="dark:text-slate-300" />
-          </button>
-          <button className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
-            <BsTrash3
+          {showLockDialog && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded-lg p-4 w-auto">
+                <div className="flex flex-col items-center">
+                  <h1 className="text-xl font-bold">Lock Controls</h1>
+                  <p className="text-xl text-center pt-4 pb-4">
+                    This will lock the controls for everyone in the room. Only the room owner can unlock the controls.
+                  </p>
+                  <input
+                    placeholder="Enter password"
+                    className="text-center p-2 rounded-lg mb-4 border-2 border-primary-200 w-64"
+                    onKeyPress={(e) => {
+                      if (!/^[a-zA-Z]+$/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(e) => {
+                      setLockPassword(e.target.value);
+                    }}
+                    value={lockPassword}
+                  />
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => {
+                        setPasswordLock();
+                        setShowLockDialog(false);
+                      }}
+                      className={`bg-primary-500 rounded-lg px-4 py-2 text-white font-semibold${
+                        lockPassword ? "" : " opacity-50"
+                      }`}
+                      disabled={!lockPassword}>
+                      Lock
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowLockDialog(false);
+                      }}
+                      className="bg-primary-500 rounded-lg px-4 py-2 text-white font-semibold">
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        unlockControls();
+                        setShowLockDialog(false);
+                      }}
+                      disabled={!roomIsLocked}
+                      className={`bg-primary-500 rounded-lg px-4 py-2 text-white font-semibold${
+                        roomIsLocked ? "" : " opacity-50"
+                      }`}>
+                      {roomIsLocked ? "Unlock" : "Already unlocked"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showUnlockDiaglog && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded-lg p-4 w-auto">
+                <div className="flex flex-col items-center">
+                  <h1 className="text-xl font-bold">Unlock controls (for yourself)</h1>
+                  <p className="text-xl text-center pt-4 pb-4">Do you know the password?!</p>
+                  <input
+                    placeholder="Enter password"
+                    className="text-center p-2 rounded-lg mb-4 border-2 border-primary-200 w-64"
+                    onKeyPress={(e) => {
+                      if (!/^[a-zA-Z]+$/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(e) => {
+                      setLockPassword(e.target.value);
+                    }}
+                    value={lockPassword}
+                  />
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => {
+                        attemptUnlock().then((result) => {
+                          if (result) {
+                            setShowUnlockDialog(false);
+                          } else {
+                            alert("Wrong password!");
+                          }
+                        });
+                      }}
+                      className={`bg-primary-500 rounded-lg px-4 py-2 text-white font-semibold${
+                        lockPassword ? "" : " opacity-50"
+                      }`}
+                      disabled={!lockPassword}>
+                      Unlock
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUnlockDialog(false);
+                      }}
+                      className="bg-primary-500 rounded-lg px-4 py-2 text-white font-semibold">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* end of lock controls */}
+
+          {/* emoji controls */}
+          <div className="relative">
+            {/* emoji controls */}
+            <button
+              className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
               onClick={() => {
-                setRoomInfo({
-                  video_name: "",
-                  video_url: "",
-                  subtitle_url: "",
-                  room_password: "",
-                  video_info: {},
-                });
-              }}
-              color="slate-800"
-              className="dark:text-slate-300"
-            />
-          </button>
-          <button
-            className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
-            onClick={rewind}>
-            <BsSkipBackward color="slate-800" className="dark:text-slate-300" />
-          </button>
-          <button
-            className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
-            onClick={ff}>
-            <BsSkipForward color="slate-800" className="dark:text-slate-300" />
-          </button>
+                setIsEmojiOpen(!isEmojiOpen);
+              }}>
+              <BsEmojiAngry color="slate-800" className="dark:text-slate-300" />
+            </button>
+
+            {isEmojiOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  zIndex: 1000,
+                  bottom: "100%", // positions the picker above the button
+                  left: "600px", // adjusts horizontal positioning
+                  transform: "translateX(-50%)", // centers the picker above the button
+                }}>
+                <EmojiPicker
+                  onEmojiClick={(event, emojiObject) => {
+                    pushEmoji(event.emoji);
+                  }}
+                  theme={Theme.DARK}
+                  pickerStyle={{
+                    width: "200px",
+                  }}
+                  disableSearchBar={true}
+                  disableSkinTonePicker={true}
+                />
+              </div>
+            )}
+          </div>
+
           <button className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 ">
             {formatTime(progress.current)} / {formatTime(progress.duration)}
           </button>
@@ -240,7 +533,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
               playerRef.current.currentTime(progress.current + msOffset);
             }}
             className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12  bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 ">
-            {msOffset}
+            {msOffsetMessage}
           </button>
           <span className="ml-2 whitespace-nowrap overflow-ellipsis overflow-hidden "></span>
           {/* End of button row */}
