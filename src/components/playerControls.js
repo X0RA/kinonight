@@ -21,7 +21,7 @@ import { Theme } from "emoji-picker-react";
 const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo }) => {
   const [cookies, setCookie] = useCookies(["roompw", "volumepercent"]);
   const { chosenRoom, setVideoInfo, roomState, setRoomState, videoInfo, roomInfo, setRoomInfo } = useUserStatus();
-  const { utcTime} = useUserStatus();
+  const { utcTime } = useAuth();
 
   // lock controls
   const [isLocked, setIsLocked] = useState(true);
@@ -168,7 +168,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
       const videoState = {
         video_length: progress.duration,
         video_position: seekTime,
-        last_update_time: Date.now(),
+        last_update_time: utcTime(),
       };
       setRoomState(videoState);
     }
@@ -193,7 +193,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
   useEffect(() => {
     if (stateSnapshot) {
       // ideal video position
-      const currentTimeInMs = new Date().getTime();
+      const currentTimeInMs = utcTime();
       const lastUpdateTimeInMs = roomState.last_update_time;
       const offsetInSeconds = (currentTimeInMs - lastUpdateTimeInMs) / 1000;
       const videoPosition = roomState.video_position || 0;
@@ -252,7 +252,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
         is_playing: true,
         video_length: progress.duration,
         video_position: progress.current,
-        last_update_time: Date.now(),
+        last_update_time: utcTime(),
       };
       setRoomState(videoState);
     }
@@ -265,7 +265,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
         is_playing: false,
         video_length: progress.duration,
         video_position: progress.current,
-        last_update_time: Date.now(),
+        last_update_time: utcTime(),
       };
       setRoomState(videoState);
     }
@@ -278,7 +278,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
       const videoState = {
         video_length: progress.duration,
         video_position: newTime,
-        last_update_time: Date.now(),
+        last_update_time: utcTime(),
       };
       setRoomState(videoState);
     }
@@ -291,7 +291,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
       const videoState = {
         video_length: progress.duration,
         video_position: newTime,
-        last_update_time: Date.now(),
+        last_update_time: utcTime(),
       };
       setRoomState(videoState);
     }
