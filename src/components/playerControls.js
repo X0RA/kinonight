@@ -24,6 +24,8 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
   const { chosenRoom, setVideoInfo, roomState, setRoomState, videoInfo, roomInfo, setRoomInfo } = useUserStatus();
   const { utcTime } = useAuth();
 
+  const [showTimeLeft, setShowTimeLeft] = useState(false);
+
   // lock controls
   const [isLocked, setIsLocked] = useState(true);
   const [roomIsLocked, setRoomIsLocked] = useState(true);
@@ -572,8 +574,14 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
             )}
           </div>
 
-          <button className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 ">
-            {formatTime(progress.current)} / {formatTime(progress.duration)}
+          <button
+            className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 "
+            onClick={() => {
+              setShowTimeLeft(!showTimeLeft);
+            }}>
+            {showTimeLeft
+              ? `${formatTime(progress.current)} / ${formatTime(progress.duration)}`
+              : `${formatTime(progress.duration - progress.current)}`}
           </button>
           <button
             onClick={() => {
