@@ -11,6 +11,7 @@ import {
   BsLockFill,
   BsLock,
   BsEmojiAngry,
+  BsCCircle,
 } from "react-icons/bs";
 import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
@@ -111,6 +112,30 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
     setVolume(newVolume);
     if (playerRef.current) {
       playerRef.current.volume(newVolume / 100);
+    }
+  };
+
+  // subtitle controls
+  const toggleSubtitles = () => {
+    // Assuming playerRef.current holds your video.js player instance
+    if (playerRef.current) {
+      const player = playerRef.current;
+
+      // Get all text tracks of the video player
+      const textTracks = player.textTracks();
+      // Loop through the text tracks
+      for (let i = 0; i < textTracks.length; i++) {
+        const track = textTracks[i];
+        // Check if the track is of kind 'subtitles'
+        if (track.kind === "subtitles" || track.kind === "captions") {
+          // Toggle the showing mode of the track
+          if (track.mode === "showing") {
+            track.mode = "disabled";
+          } else {
+            track.mode = "showing";
+          }
+        }
+      }
     }
   };
 
@@ -435,6 +460,17 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
                       }`}>
                       {roomIsLocked ? "Unlock" : "Already unlocked"}
                     </button>
+                    <button
+                      onClick={() => {
+                        setIsLocked(true);
+                        setLockPassword("");
+                        setRoomIsLocked(true);
+                        setCookie("roompw", chosenRoom + ":" + "", { path: "/", sameSite: "Strict" });
+                        setShowLockDialog(false);
+                      }}
+                      className={`bg-primary-500 rounded-lg px-4 py-2 text-white font-semibold`}>
+                      Take away my control
+                    </button>
                   </div>
                 </div>
               </div>
@@ -489,6 +525,17 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
             </div>
           )}
           {/* end of lock controls */}
+
+          {/* subtitle control */}
+          {videoInfo.subtitle_url && (
+            <button
+              className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
+              onClick={() => {
+                toggleSubtitles();
+              }}>
+              <BsCCircle color="slate-800" className="dark:text-slate-300" />
+            </button>
+          )}
 
           {/* emoji controls */}
           <div className="relative">

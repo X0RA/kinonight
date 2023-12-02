@@ -78,9 +78,7 @@ export const VideoJS = (props) => {
   };
 
   return (
-    <div
-      data-vjs-player
-      className="w-screen h-screen flex items-center justify-center bg-black relative hover:cursor-pointer">
+    <div data-vjs-player className="w-screen h-screen flex items-center justify-center bg-black relative">
       <div
         ref={videoRef}
         className="w-full aspect-[16/9] max-h-screen object-cover"

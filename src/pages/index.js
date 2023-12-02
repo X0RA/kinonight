@@ -111,7 +111,8 @@ function Index() {
             value={displayName}
             onChange={(e) => {
               const val = e.target.value;
-              const reg = /^[A-Za-z_]*$/;
+              const reg = /^[A-Za-z0-9_ ]*$/; 
+
               if (reg.test(val)) {
                 setDisplayName(val);
               }

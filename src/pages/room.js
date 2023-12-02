@@ -20,6 +20,27 @@ function Room() {
   const { chosenRoom, setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
   const [userInteraction, setUserInteraction] = useState(false);
 
+  // mouse stuff
+  const [isCursorVisible, setIsCursorVisible] = useState(true);
+  let mouseMoveTimeout;
+
+  const handleMouseMove = () => {
+    setIsCursorVisible(true);
+    clearTimeout(mouseMoveTimeout);
+    mouseMoveTimeout = setTimeout(() => {
+      setIsCursorVisible(false);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      clearTimeout(mouseMoveTimeout);
+    };
+  }, []);
+
   // Redirects to the login page if the user is not logged in
   useEffect(() => {
     if (!currentUser) {
@@ -132,10 +153,10 @@ function Room() {
       );
     } else {
       return (
-        <>
+        <div className={`${isCursorVisible ? "cursor-auto" : "cursor-none"}`}>
           <EmojiReactions />
           <VideoJS options={videoOptions} />
-        </>
+        </div>
       );
     }
   }
