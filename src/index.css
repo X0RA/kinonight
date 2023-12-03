@@ -10,3 +10,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   @apply bg-slate-200;
 }
+
+body {
+  @apply bg-black;
+}

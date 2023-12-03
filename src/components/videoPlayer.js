@@ -6,6 +6,7 @@ import "./VideoPlayer.css"; // Import the custom CSS file
 import { useNavigate } from "react-router-dom";
 import PlayerControls from "./playerControls";
 import { useUserStatus } from "../middleware/StateContext";
+import Sidebar from "./sidebar";
 
 export const VideoJS = (props) => {
   const videoRef = useRef(null);
@@ -13,7 +14,11 @@ export const VideoJS = (props) => {
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
   const { chosenRoom, setVideoInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
-  
+
+  const [doShowSidebar, setDoShowSidebar] = useState(false);
+
+  const mainContentClass = doShowSidebar ? "pr-52" : "pl-0"; // pl-52 for padding left equal to the width of the sidebar
+
   const controlBarRef = useRef(null);
   const observerRef = useRef(null);
 
@@ -135,32 +140,41 @@ export const VideoJS = (props) => {
   };
 
   return (
-    <div data-vjs-player className="w-screen h-screen flex items-center justify-center bg-black relative">
-      <div
-        ref={videoRef}
-        className="w-full aspect-[16/9] max-h-screen object-cover"
-        style={{ maxWidth: "calc(100vh * 16 / 9)" }}
-        autoPlay={true}
-        playsInline={true}
-      />
-      <div
-        ref={controlBarRef}
-        onMouseEnter={() => {
-          adjustSubtitlePosition(true);
-        }}
-        onMouseLeave={() => {
-          adjustSubtitlePosition(false);
-        }}
-        className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
-        {/* <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100 transition-opacity duration-200"> */}
-        <PlayerControls
-          playerRef={playerRef}
-          progress={progress}
-          logOut={logOut}
-          clearVideo={clearVideo}
-          formatTime={formatTime}></PlayerControls>
+    <>
+      {/* Sidebar */}
+      <div className={`${doShowSidebar ? "absolute w-52 h-screen" : "hidden"}`}>
+        <Sidebar />
       </div>
-    </div>
+      <div className={`w-full h-screen ${mainContentClass}`}>
+        <div data-vjs-player className="w-full h-full flex items-center justify-center bg-black relative">
+          <div
+            ref={videoRef}
+            className="w-full aspect-[16/9] max-h-screen object-cover"
+            style={{ maxWidth: "calc(100vh * 16 / 9)" }}
+            autoPlay={true}
+            playsInline={true}
+          />
+          <div
+            ref={controlBarRef}
+            onMouseEnter={() => {
+              adjustSubtitlePosition(true);
+            }}
+            onMouseLeave={() => {
+              adjustSubtitlePosition(false);
+            }}
+            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
+            <PlayerControls
+              playerRef={playerRef}
+              setSidebar={setDoShowSidebar}
+              sidebar={doShowSidebar}
+              progress={progress}
+              logOut={logOut}
+              clearVideo={clearVideo}
+              formatTime={formatTime}></PlayerControls>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

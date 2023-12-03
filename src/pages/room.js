@@ -20,6 +20,8 @@ function Room() {
   const { chosenRoom, setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
   const [userInteraction, setUserInteraction] = useState(false);
 
+  const [doShowSidebar, setDoShowSidebar] = useState(false);
+
   // mouse stuff
   const [isCursorVisible, setIsCursorVisible] = useState(true);
   let mouseMoveTimeout;

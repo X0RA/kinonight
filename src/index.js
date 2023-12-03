@@ -9,8 +9,6 @@ import Index from "./pages/index";
 import Room from "./pages/room";
 import SubtitleUploadPage from "./pages/SubtitleUploadPage";
 
-import EmojiReactions from "./components/emojiReact";
-
 const router = createHashRouter([
   {
     path: "/",
@@ -28,10 +26,6 @@ const router = createHashRouter([
       {
         path: "subtitleUpload",
         element: <SubtitleUploadPage />,
-      },
-      {
-        path: "emoji",
-        element: <EmojiReactions />,
       },
     ],
   },
