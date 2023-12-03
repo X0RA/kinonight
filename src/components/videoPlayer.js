@@ -15,7 +15,7 @@ export const VideoJS = (props) => {
   const Navigate = useNavigate();
   const { chosenRoom, setVideoInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
 
-  const [doShowSidebar, setDoShowSidebar] = useState(false);
+  const [doShowSidebar, setDoShowSidebar] = useState(true);
 
   const mainContentClass = doShowSidebar ? "pr-52" : "pl-0"; // pl-52 for padding left equal to the width of the sidebar
 
