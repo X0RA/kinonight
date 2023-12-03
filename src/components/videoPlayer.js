@@ -13,6 +13,63 @@ export const VideoJS = (props) => {
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
   const { chosenRoom, setVideoInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
+  
+  const controlBarRef = useRef(null);
+  const observerRef = useRef(null);
+
+  const isMouseOnControlBar = () => {
+    return controlBarRef.current && controlBarRef.current.matches(":hover");
+  };
+
+  useEffect(() => {
+    const checkAndObserve = () => {
+      const targetNode = document.querySelector(".vjs-text-track-display");
+      if (targetNode && !observerRef.current) {
+        const observerCallback = (mutationsList) => {
+          let mouseOnBar = isMouseOnControlBar();
+          if (mouseOnBar) {
+            adjustSubtitlePosition(mouseOnBar);
+          }
+        };
+
+        observerRef.current = new MutationObserver(observerCallback);
+        observerRef.current.observe(targetNode, { childList: true, subtree: true });
+      } else if (!targetNode) {
+        setTimeout(checkAndObserve, 1000);
+      }
+    };
+
+    checkAndObserve();
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
+  }, []);
+
+  const adjustSubtitlePosition = (doMove) => {
+    const trackDisplay = document.querySelector(".vjs-text-track-display");
+    const subDisplay = document.querySelector(".vjs-text-track-cue ");
+    const alteredSub = document.querySelector(".altered-subtitle");
+
+    if (trackDisplay && subDisplay) {
+      const style = window.getComputedStyle(subDisplay);
+      const insetHeight = style.getPropertyValue("inset");
+      const cueHeight = parseInt(insetHeight.split(" ")[0].replace("px", ""));
+      const subtitleOffset = alteredSub !== null ? ` ${cueHeight + 68}px 0px 0px` : ` ${cueHeight - 68}px 0px 0px`;
+
+      if (doMove) {
+        subDisplay.style.setProperty("inset", subtitleOffset);
+        subDisplay.classList.add("altered-subtitle");
+      }
+      if (!doMove && alteredSub) {
+        alteredSub.style.setProperty("inset", subtitleOffset);
+        alteredSub.classList.remove("altered-subtitle");
+      }
+    }
+  };
 
   // Define state for video progress
   const [progress, setProgress] = useState({ current: 0, duration: 0, percentage: 0 });
@@ -86,7 +143,15 @@ export const VideoJS = (props) => {
         autoPlay={true}
         playsInline={true}
       />
-      <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
+      <div
+        ref={controlBarRef}
+        onMouseEnter={() => {
+          adjustSubtitlePosition(true);
+        }}
+        onMouseLeave={() => {
+          adjustSubtitlePosition(false);
+        }}
+        className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
         {/* <div className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100 transition-opacity duration-200"> */}
         <PlayerControls
           playerRef={playerRef}

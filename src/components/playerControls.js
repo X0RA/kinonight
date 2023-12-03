@@ -579,7 +579,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo })
             onClick={() => {
               setShowTimeLeft(!showTimeLeft);
             }}>
-            {showTimeLeft
+            {!showTimeLeft
               ? `${formatTime(progress.current)} / ${formatTime(progress.duration)}`
               : `${formatTime(progress.duration - progress.current)}`}
           </button>

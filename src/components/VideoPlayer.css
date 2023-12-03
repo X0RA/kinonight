@@ -47,3 +47,6 @@
 [data-vjs-player]:hover .control-bar {
   pointer-events: auto;
 }
+
+.vjs-text-track-cue {
+}
