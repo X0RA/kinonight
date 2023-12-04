@@ -10,6 +10,7 @@
     "animejs": "^3.2.2",
     "axios": "^1.4.0",
     "css.gg": "^2.0.0",
+    "emoji-picker-element": "^1.19.2",
     "emoji-picker-react": "^4.5.16",
     "firebase": "^9.22.1",
     "fs": "^0.0.1-security",

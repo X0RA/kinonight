@@ -1,55 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import anime from "animejs";
 import "./EmojiReactions.css";
 import { useUserStatus } from "../middleware/StateContext";
 
 const EmojiReactions = () => {
   const [emojis, setEmojis] = useState([]);
-  const { chosenRoom, setVideoInfo, roomState, setRoomState, videoInfo, roomInfo, setRoomInfo } = useUserStatus();
+  const { roomInfo } = useUserStatus();
+  const lastEmoji = useRef(roomInfo?.reactionEmoji); // useRef to keep track of the last emoji
 
-  useEffect(() => {
-    emojis.forEach((emoji) => {
-      if (!emoji.isAnimating) {
-        anime({
-          targets: `#emoji-${emoji.id}`,
-          translateY: [0, -window.innerHeight * 0.4],
-          rotate: {
-            value: "1turn",
-            duration: 1800,
-            easing: "linear",
-          },
-          opacity: [1, 0],
-          duration: 1800,
-          easing: "easeInOutQuad",
-          begin: () => {
-            setEmojis((currentEmojis) =>
-              currentEmojis.map((e) => (e.id === emoji.id ? { ...e, isAnimating: true } : e))
-            );
-          },
-          complete: () => {
-            setEmojis((currentEmojis) => currentEmojis.filter((e) => e.id !== emoji.id));
-          },
-        });
-      }
+  const animateEmoji = (emoji) => {
+    anime({
+      targets: `#emoji-${emoji.id}`,
+      translateY: [0, -window.innerHeight * 0.4],
+      rotate: {
+        value: "1turn",
+        duration: 1800,
+        easing: "linear",
+      },
+      opacity: [1, 0],
+      duration: 1800,
+      easing: "easeInOutQuad",
+      complete: () => {
+        setEmojis((currentEmojis) => currentEmojis.filter((e) => e.id !== emoji.id));
+      },
     });
-  }, [emojis]);
+  };
 
-  const addEmoji = async (emojiChar, id) => {
+  const addEmoji = (emojiChar, id) => {
     const positionX = Math.random() * 100;
-    setEmojis((currentEmojis) => [...currentEmojis, { emoji: emojiChar, id, positionX, isAnimating: false }]);
+    const newEmoji = { emoji: emojiChar, id, positionX, isAnimating: true };
+    setEmojis((currentEmojis) => [...currentEmojis, newEmoji]);
+
+    // Introduce a slight delay before animating
+    setTimeout(() => animateEmoji(newEmoji), 50);
   };
 
   useEffect(() => {
-    if (roomInfo?.reactionEmoji) {
-      let emoji = roomInfo.reactionEmoji.split(":")[0];
-      let id = roomInfo.reactionEmoji.split(":")[1];
-      if (emojis.find((e) => e.id === id)) {
-        setEmojis((currentEmojis) => currentEmojis.filter((e) => e.id !== id));
-      } else {
-        addEmoji(emoji);
+    if (roomInfo?.reactionEmoji && roomInfo.reactionEmoji !== lastEmoji.current) {
+      let [emoji, id] = roomInfo.reactionEmoji.split(":");
+      if (!emojis.find((e) => e.id === id)) {
+        addEmoji(emoji, id);
       }
+      lastEmoji.current = roomInfo.reactionEmoji; // Update the ref after handling the emoji
     }
-  }, [roomInfo]);
+  }, [roomInfo?.reactionEmoji]); // Depend only on roomInfo.reactionEmoji
 
   return (
     <div className="emoji-container">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { GoSignOut } from "react-icons/go";
 import {
   BsPlay,
@@ -17,8 +17,11 @@ import {
 import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
 import { useAuth } from "../middleware/AuthContext";
+
 import EmojiPicker from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
+
+import { Picker } from "emoji-picker-element";
 
 const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, sidebar, setSidebar }) => {
   const [cookies, setCookie] = useCookies(["roompw", "volumepercent"]);
@@ -99,6 +102,23 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
 
   // Emoji picker controls
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const emojiPickerRef = useRef(null); // Ref for the emoji picker container
+
+  const handleClickOutside = (event) => {
+    if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+      setIsEmojiOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    // Attach the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      // Clean up the event listener
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const pushEmoji = (emoji) => {
     setRoomInfo({
@@ -108,9 +128,8 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
   };
 
   // Volume logic
-  const [volume, setVolume] = useState();
-  const changeVolume = (event) => {
-    const newVolume = event.target.value;
+  const [volume, setVolume] = useState(100);
+  const changeVolume = (newVolume) => {
     setCookie("volumepercent", newVolume, { path: "/", sameSite: "Strict" });
     setVolume(newVolume);
     if (playerRef.current) {
@@ -141,15 +160,6 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
       }
     }
   };
-
-  useEffect(() => {
-    console.log("setting volume");
-    if (cookies["volumepercent"]) {
-      setVolume(cookies["volumepercent"]);
-    } else {
-      setVolume(100);
-    }
-  }, [playerRef]);
 
   const requestFullscreen = () => {
     const doc = document.documentElement;
@@ -243,6 +253,10 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
       await checkPlayerReadyState(playerRef);
       if (roomState) {
         // this means its a first load
+        // cookies volume logic
+        if (cookies["volumepercent"]) {
+          changeVolume(cookies["volumepercent"]);
+        }
         if (!stateSnapshot) {
           setStateSnapshot(roomState);
           if (roomState.is_playing) {
@@ -342,7 +356,9 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
           id="small-range"
           type="range"
           value={volume}
-          onChange={changeVolume}
+          onChange={(event) => {
+            changeVolume(event.target.value);
+          }}
           className="w-1/6 h-2  rounded appearance-none cursor-pointer range-sm bg-slate-400 dark:bg-slate-800 rounded-lg "
         />
       </div>
@@ -384,6 +400,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
                   setRoomInfo({
                     ...roomInfo,
                     chatMessages: [],
+                    reactionEmoji: "",
                   });
                 }}
                 color="slate-800"
@@ -556,6 +573,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
 
           {isEmojiOpen && (
             <div
+              ref={emojiPickerRef}
               style={{
                 position: "absolute",
                 zIndex: 1000,
