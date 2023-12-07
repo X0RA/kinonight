@@ -53,7 +53,7 @@ const EmojiSelector = ({ open, setOpen, emojiClick }) => {
           height: `${baseCellSize}px`, // Fixed height excluding margin
           width: `${baseCellSize}px`, // Fixed width excluding margin
         }}
-        className="cursor-pointer rounded-md bg-slate-700 hover:bg-blue-100"
+        className="cursor-pointer rounded-md bg-slate-800 hover:bg-blue-100"
         title={emojiKey}
         onClick={() => emojiClick(emoji)}>
         <span className="text-lg">{emoji}</span>
@@ -64,14 +64,14 @@ const EmojiSelector = ({ open, setOpen, emojiClick }) => {
   return (
     <div
       id="dropdown-button"
-      className="left-0 mt-2 p-4 max-h-52  bg-slate-800 shadow-md rounded-lg"
+      className="left-0 mt-2 p-4 max-h-52  bg-slate-900 shadow-md rounded-lg"
       style={{ display: open ? "block" : "none", width: "24.85rem" }}
       onKeyDown={handleEscape}>
       <input
         type="search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="h-8 w-full px-2 mb-2 text-sm border border-1 text-slate-300 border-slate-500 bg-slate-700 rounded-md placeholder:text-gray-500"
+        className="h-8 w-full px-2 mb-2 text-sm border border-1 text-slate-300 border-slate-600 bg-slate-800 rounded-md placeholder:text-gray-500"
         placeholder="Search an emoji..."
       />
       <Grid

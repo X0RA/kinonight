@@ -14,7 +14,6 @@ import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
 import { useAuth } from "../middleware/AuthContext";
 
-import { Theme } from "emoji-picker-react";
 
 import EmojiSelector from "./emojiPicker";
 

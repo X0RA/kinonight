@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import PlayerControls from "./playerControls";
 import { useUserStatus } from "../middleware/StateContext";
 import Sidebar from "./sidebar";
+import NewControls from "./newControls";
 
 export const VideoJS = (props) => {
   const videoRef = useRef(null);
@@ -172,14 +173,14 @@ export const VideoJS = (props) => {
               adjustSubtitlePosition(false);
             }}
             className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <PlayerControls
+            <NewControls
               playerRef={playerRef}
               setSidebar={setDoShowSidebar}
               sidebar={doShowSidebar}
               progress={progress}
               logOut={logOut}
               clearVideo={clearVideo}
-              formatTime={formatTime}></PlayerControls>
+              formatTime={formatTime}></NewControls>
           </div>
         </div>
       </div>

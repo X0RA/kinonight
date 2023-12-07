@@ -27,7 +27,7 @@ const Sidebar = () => {
   useEffect(() => {}, []);
 
   return (
-    <div className="sidebar w-52 h-screen bg-slate-900 fixed right-0 text-slate-200 flex flex-col rounded-s-md">
+    <div className="sidebar w-52 h-screen bg-slate-900 fixed right-0 text-slate-200 flex flex-col rounded-tl-md">
       {/* room info */}
       <div className="info-container w-full pl-1 flex-shrink-0">
         {/* room name */}

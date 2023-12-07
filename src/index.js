@@ -30,7 +30,7 @@ const router = createHashRouter([
         element: <SubtitleUploadPage />,
       },
       {
-        path: "emoji",
+        path: "test",
         element: <Temp />,
       },
     ],
