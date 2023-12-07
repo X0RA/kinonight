@@ -26,12 +26,12 @@ const getPutIOVideoUrl = async (oauthToken) => {
     oauthToken +
     "&stream_url_parent=1&video_metadata_parent=1";
   var apiResponse = await fetch(apiUrl);
-  if (apiResponse.ok == false || apiResponse.status != 200) {
+  if (apiResponse.ok === false || apiResponse.status !== 200) {
     return { status: false, url: null, error: "Probably an invalid link" };
   }
   var jsonData = await apiResponse.json();
   // if the file is not an mp4 and or it needs to be converted
-  if (jsonData.parent.extension != "mp4" && jsonData.parent.need_convert == true) {
+  if (jsonData.parent.extension !== "mp4" && jsonData.parent.need_convert === true) {
     return { status: false, url: null, error: "There is no mp4 available yet" };
   }
   // if jsonData.parent.mp4_stream_url exists then use that, otherwise use jsonData.parent.stream_url

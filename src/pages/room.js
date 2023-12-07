@@ -6,14 +6,14 @@ import { useAuth } from "../middleware/AuthContext";
 import { processUrl } from "../components/helpers";
 import { VideoJS } from "../components/videoPlayer";
 import VideoOptionsPage from "../components/videoOptions";
-import EmojiReactions from "../components/emojiReact";
+import EmojiReactions from "../components/emojiOverlay";
 
 function Room() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [cookies, setCookie] = useCookies(["room", "username"]);
   const [loading, setLoading] = useState(true);
-  const { chosenRoom, setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
+  const { setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
   const [userInteraction, setUserInteraction] = useState(false);
 
   // hide cursor when not in use when video is playing
@@ -138,7 +138,7 @@ function Room() {
     );
   }
 
-  if (videoOptions == null) {
+  if (videoOptions === null) {
     return <VideoOptionsPage />;
   }
 

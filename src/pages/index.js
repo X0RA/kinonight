@@ -2,7 +2,6 @@ import { useCookies } from "react-cookie";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../middleware/AuthContext";
-import { useUserStatus } from "../middleware/StateContext";
 
 import { Fragment } from "react";
 import { Transition } from "@headlessui/react";
@@ -15,9 +14,7 @@ function Index() {
   const [room, setRoom] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { currentUser, loginOrSignUp, logout, setUsername } = useAuth();
-  const { chosenRoom, setChosenRoom } = useUserStatus();
-  const [loading, setLoading] = useState(false);
+  const { currentUser, loginOrSignUp, setUsername } = useAuth();
 
   const handleJoin = async () => {
     if (!currentUser) {
@@ -28,7 +25,6 @@ function Index() {
           setCookie("accountName", accountName, { path: "/", sameSite: "Strict" });
           setCookie("password", password, { path: "/", sameSite: "Strict" });
           setCookie("displayName", displayName, { path: "/", sameSite: "Strict" });
-          setChosenRoom(room);
           navigate("/room/" + room);
         } else {
           setError(["Enter a proper room name", ...error]);
@@ -44,7 +40,6 @@ function Index() {
       }
       setCookie("displayName", displayName, { path: "/", sameSite: "Strict" });
       if (room && room.trim() !== "") {
-        setChosenRoom(room);
         navigate("/room/" + room);
       } else {
         setError(["Enter a proper room name", ...error]);
@@ -111,7 +106,7 @@ function Index() {
             value={displayName}
             onChange={(e) => {
               const val = e.target.value;
-              const reg = /^[A-Za-z0-9_ ]*$/; 
+              const reg = /^[A-Za-z0-9_ ]*$/;
 
               if (reg.test(val)) {
                 setDisplayName(val);
@@ -139,16 +134,6 @@ function Index() {
             Join
           </button>
         </div>
-        {/* logout button
-        <div className={currentUser ? "col-span-1" : "hidden"}>
-          <button
-            className="mt-2 p-2 rounded-lg bg-white w-full text-primary-400 font-bold"
-            onClick={() => {
-              logout();
-            }}>
-            Logout
-          </button>
-        </div> */}
       </div>
       {error && (
         <Transition

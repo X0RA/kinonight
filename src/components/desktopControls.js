@@ -9,14 +9,14 @@ import { SidebarCollapse } from "@styled-icons/octicons";
 import { FullScreenMaximize } from "@styled-icons/fluentui-system-regular";
 import { Subtitles } from "@styled-icons/material-rounded/Subtitles";
 import { VolumeMute, VolumeDown, VolumeUp } from "@styled-icons/evaicons-solid";
-import "./newControls.css";
+import "./desktopControls.css";
 
 import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
 import { useAuth } from "../middleware/AuthContext";
 import EmojiSelector from "./emojiPicker";
 
-const NewControls = ({ playerRef, progress, logOut, formatTime, clearVideo, sidebar, setSidebar }) => {
+const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, sidebar, setSidebar }) => {
   const [cookies, setCookie] = useCookies(["roompw", "volumepercent"]);
   const { chosenRoom, setVideoInfo, roomState, setRoomState, videoInfo, roomInfo, setRoomInfo } = useUserStatus();
   const { utcTime } = useAuth();
@@ -44,7 +44,7 @@ const NewControls = ({ playerRef, progress, logOut, formatTime, clearVideo, side
 
   const attemptUnlock = async () => {
     try {
-      if (lockPassword == roomInfo.room_password) {
+      if (lockPassword === roomInfo.room_password) {
         setCookie("roompw", chosenRoom + ":" + lockPassword, { path: "/", sameSite: "Strict" });
         return true;
       } else {
@@ -726,4 +726,4 @@ const NewControls = ({ playerRef, progress, logOut, formatTime, clearVideo, side
   );
 };
 
-export default NewControls;
+export default DesktopControls;

@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUserStatus } from "../middleware/StateContext";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import "tailwindcss/tailwind.css";
-import "./VideoPlayer.css"; // Import the custom CSS file
-import { useNavigate } from "react-router-dom";
-import PlayerControls from "./playerControls";
-import { useUserStatus } from "../middleware/StateContext";
+import "./VideoPlayer.css";
 import Sidebar from "./sidebar";
-import NewControls from "./newControls";
+import DesktopControls from "./desktopControls";
 
 export const VideoJS = (props) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
-  const { chosenRoom, setVideoInfo, roomState, setRoomState, setVideoOptions } = useUserStatus();
+  const { setVideoOptions } = useUserStatus();
 
   const [doShowSidebar, setDoShowSidebar] = useState(true);
 
@@ -92,9 +91,6 @@ export const VideoJS = (props) => {
       videoRef.current.appendChild(videoElement);
 
       const player = (playerRef.current = videojs(videoElement, options, () => {
-        videojs.log("player is ready");
-        // playerRef.current.pause(); // pause the player initially
-        // playerRef.current.currentTime(roomState.video_position || 0); // set the initial time position
         onReady && onReady(player);
       }));
 
@@ -173,14 +169,14 @@ export const VideoJS = (props) => {
               adjustSubtitlePosition(false);
             }}
             className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <NewControls
+            <DesktopControls
               playerRef={playerRef}
               setSidebar={setDoShowSidebar}
               sidebar={doShowSidebar}
               progress={progress}
               logOut={logOut}
               clearVideo={clearVideo}
-              formatTime={formatTime}></NewControls>
+              formatTime={formatTime}></DesktopControls>
           </div>
         </div>
       </div>

@@ -11,7 +11,6 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
-  const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(true);
 
   // clock logic
@@ -58,7 +57,7 @@ export function AuthProvider({ children }) {
       await login(email, password);
       return { status: true };
     } catch (error) {
-      if (error.code === "auth/user-not-found" || error.code == "auth/invalid-login-credentials") {
+      if (error.code === "auth/user-not-found" || error.code === "auth/invalid-login-credentials") {
         try {
           await register(email, password);
           return { status: true };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import anime from "animejs";
-import "./EmojiReactions.css";
+import "./emojiOverlay.css";
 import { useUserStatus } from "../middleware/StateContext";
 
 const EmojiReactions = () => {

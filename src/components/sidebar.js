@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import anime from "animejs";
 import { TiUser, TiVideo } from "react-icons/ti";
 import "./sidebar.css";
 import { useUserStatus } from "../middleware/StateContext";

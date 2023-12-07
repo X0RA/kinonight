@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { FixedSizeGrid as Grid } from "react-window";
-import emojis from "./emojis.json"; // Importing the emojis
+import emojis from "./emojis.json";
 
 const EmojiSelector = ({ open, setOpen, emojiClick }) => {
   const [search, setSearch] = useState("");
@@ -47,11 +47,11 @@ const EmojiSelector = ({ open, setOpen, emojiClick }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          margin: `${margin}px`, // Add margin
-          padding: `${padding}px`, // Add padding
+          margin: `${margin}px`,
+          padding: `${padding}px`,
           boxSizing: "border-box",
-          height: `${baseCellSize}px`, // Fixed height excluding margin
-          width: `${baseCellSize}px`, // Fixed width excluding margin
+          height: `${baseCellSize}px`,
+          width: `${baseCellSize}px`,
         }}
         className="cursor-pointer rounded-md bg-slate-800 hover:bg-blue-100"
         title={emojiKey}
@@ -77,10 +77,10 @@ const EmojiSelector = ({ open, setOpen, emojiClick }) => {
       <Grid
         className="overflow-y-auto"
         columnCount={columnCount}
-        columnWidth={totalCellSize + margin * 2} // Include margin in size calculation
+        columnWidth={totalCellSize + margin * 2}
         height={146}
         rowCount={Math.ceil(Object.keys(filteredEmojis).length / columnCount)}
-        rowHeight={totalCellSize + margin * 2} // Include margin in size calculation
+        rowHeight={totalCellSize + margin * 2}
         width={380}>
         {Cell}
       </Grid>
