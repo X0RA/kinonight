@@ -11,7 +11,7 @@ const Temp = () => {
         onClick={() => setEmojiOpen(!emojiOpen)}>
         <span>Emoji</span>
       </button>
-      <EmojiDropdown open={emojiOpen} setOpen={setEmojiOpen}></EmojiDropdown>
+      <EmojiDropdown emojiClick={(e) => console.log(e)} open={emojiOpen} setOpen={setEmojiOpen}></EmojiDropdown>
     </div>
   );
 };

@@ -18,10 +18,9 @@ import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
 import { useAuth } from "../middleware/AuthContext";
 
-import EmojiPicker from "emoji-picker-react";
 import { Theme } from "emoji-picker-react";
 
-import { Picker } from "emoji-picker-element";
+import EmojiSelector from "./emojiPicker";
 
 const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, sidebar, setSidebar }) => {
   const [cookies, setCookie] = useCookies(["roompw", "volumepercent"]);
@@ -103,9 +102,15 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
   // Emoji picker controls
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const emojiPickerRef = useRef(null); // Ref for the emoji picker container
+  const emojiToggleButtonRef = useRef(null); // ref for the button that toggles the emoji picker visibility
 
   const handleClickOutside = (event) => {
-    if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+    if (
+      emojiPickerRef.current &&
+      !emojiPickerRef.current.contains(event.target) &&
+      emojiToggleButtonRef.current &&
+      !emojiToggleButtonRef.current.contains(event.target)
+    ) {
       setIsEmojiOpen(false);
     }
   };
@@ -161,51 +166,48 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
     }
   };
 
-const requestFullscreen = () => {
-  const videoElement = playerRef.current; // Assuming this is your video element
+  const requestFullscreen = () => {
+    const videoElement = playerRef.current; // Assuming this is your video element
 
-  if (!videoElement) return;
+    if (!videoElement) return;
 
-  // Check if full-screen mode is already active
-  if (
-    document.fullscreenElement ||
-    document.webkitFullscreenElement ||
-    document.mozFullScreenElement ||
-    document.msFullscreenElement
-  ) {
-    // Exit full-screen mode
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      // Safari
-      document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      // Firefox
-      document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-      // IE/Edge
-      document.msExitFullscreen();
+    // Check if full-screen mode is already active
+    if (
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    ) {
+      // Exit full-screen mode
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        // Safari
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        // Firefox
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        // IE/Edge
+        document.msExitFullscreen();
+      }
+    } else {
+      // Enter full-screen mode
+      if (videoElement.requestFullscreen) {
+        videoElement.requestFullscreen();
+      } else if (videoElement.webkitRequestFullscreen) {
+        // Safari
+        videoElement.webkitRequestFullscreen();
+      } else if (videoElement.mozRequestFullScreen) {
+        // Firefox
+        videoElement.mozRequestFullScreen();
+      } else if (videoElement.msRequestFullscreen) {
+        // IE/Edge
+        videoElement.msRequestFullscreen();
+      }
     }
-  } else {
-    // Enter full-screen mode
-    if (videoElement.requestFullscreen) {
-      videoElement.requestFullscreen();
-    } else if (videoElement.webkitRequestFullscreen) {
-      // Safari
-      videoElement.webkitRequestFullscreen();
-    } else if (videoElement.mozRequestFullScreen) {
-      // Firefox
-      videoElement.mozRequestFullScreen();
-    } else if (videoElement.msRequestFullscreen) {
-      // IE/Edge
-      videoElement.msRequestFullscreen();
-    }
-  }
-};
+  };
 
-
-  
-  
   const handleProgressBarClick = (event) => {
     if (!isLocked) {
       const progressBar = event.currentTarget;
@@ -576,6 +578,7 @@ const requestFullscreen = () => {
         <div className="relative">
           {/* emoji controls */}
           <button
+            ref={emojiToggleButtonRef}
             className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
             onClick={() => {
               setIsEmojiOpen(!isEmojiOpen);
@@ -589,21 +592,13 @@ const requestFullscreen = () => {
               style={{
                 position: "absolute",
                 zIndex: 1000,
-                bottom: "100%", // positions the picker above the button
-                left: "600px", // adjusts horizontal positioning
-                transform: "translateX(-50%)", // centers the picker above the button
+                bottom: "80px", // positions the picker above the button
+                left: "50px", // adjusts horizontal positioning
               }}>
-              <EmojiPicker
-                onEmojiClick={(event, emojiObject) => {
-                  pushEmoji(event.emoji);
-                }}
-                theme={Theme.DARK}
-                pickerStyle={{
-                  width: "200px",
-                }}
-                disableSearchBar={true}
-                disableSkinTonePicker={true}
-              />
+              <EmojiSelector
+                open={isEmojiOpen}
+                setOpen={setIsEmojiOpen}
+                emojiClick={(e) => pushEmoji(e)}></EmojiSelector>
             </div>
           )}
         </div>

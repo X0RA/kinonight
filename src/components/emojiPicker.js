@@ -1,95 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useMemo } from "react";
+import { FixedSizeGrid as Grid } from "react-window";
+import emojis from "./emojis.json"; // Importing the emojis
 
-const EmojiDropdown = ({ open, setOpen }) => {
+const EmojiSelector = ({ open, setOpen, emojiClick }) => {
   const [search, setSearch] = useState("");
-  const [input, setInput] = useState("🙂");
-  const buttonRef = useRef(null);
-  const panelRef = useRef(null);
-
-  const emojis = {
-    "tractor, farm, machine, agriculture": "🚜",
-    "leaf, plant, nature, green, agricultre, ecology": "🌿",
-    "corn, field, agricuultre, vegetable, plant, nature, green, ecology": "🌽",
-    "fish, sea, ocan, swimming, water": "🐟",
-    "home, house, building, apartment, residence": "🏠",
-    "university, official, building, columns, institution": "🏦",
-    "school, education, student, learn, diploma": "🏫",
-    "education, school, student, learn, diploma": "🎓",
-    "child, children, young": "🧒",
-    "book, paper, knowledge, reading, library, books, literature": "📖",
-    "scroll, paper, document, page, book": "📜",
-    "contract, bookmark, tab, sheet, signature": "📑",
-    "pencil, write, edit, paper, memo, note": "✏️",
-    "pen, write, paper, memo, note, fountain pen": "✒️",
-    "military, army, soldier, war, helmet": "🪖",
-    "tool, measure, scale, ruler, law, regulation, enforcement": "⚖️",
-    "police, cop, urgence, security, law, enforcement, arrest, criminal, law enforcement": "🚓",
-    "shield, protection, security, safety, defense": "🛡️",
-    "urgence, police, fire, light, warning, danger": "🚨",
-    "bomb, explode, explosion, bang, blast, grenade": "💣",
-    "fire, flame, hot, heat, blaze, brigade": "🔥",
-    "thermometer, hot, temperature, warm, ill, illness, fever": "🌡️",
-    "money, bag, dollar, coin": "💰",
-    "money, purse, wallet, bag, dollar, euro": "👛",
-    "credit, bank, money, loan, bill, payment, credit card": "💶",
-    "chart, graph, analytics, statistics, data, report": "📊",
-    "money, dollar, currency, payment, bank, banknote, exchange, cash": "💱",
-    "money, dollar, currency, payment, bank, banknote, exchange, cash": "💵",
-    "money, dollar, currency, payment, bank, banknote, exchange, cash, fly": "💸",
-    "shopping, buy, purchase, cart, buy": "🛒",
-    "shopping, buy, purchase, shopping cart": "🛍️",
-    "travel, luggage, bag, suitcase, bag": "🧳",
-    "film, movie, motion, cinema, theater, culture": "🎬",
-    "computer, laptop, digital, keyboard, monitor, screen": "💻",
-    "lightning, bolt, electricity, science": "⚡",
-    "light, bulb, electric, electricity": "💡",
-    "flashlight, light, lamp": "🔦",
-    "rocket, launch, space, ship, plane, space, start up": "🚀",
-    "hospital, medical, center, care, health, sickness, disease, illness": "🏥",
-    "clothing, lab, coat, science, laboratory": "🥼",
-    "factory, building, manufacturing, production, construction, polution": "🏭",
-    "globe, world, earth, planet, map, travel, space": "🌍",
-    "location, map, pin, marker, navigation, aid": "📍",
-    "europe, european union, flag, country, nation, place, location, geography, globe": "🇪🇺",
-    "custom, border, control, security, safety, protection": "🛂",
-    "bus, car, transportation, transportation vehicle, trolly": "🚎",
-    "alarm, clock, morning, ring, wake up": "⏰",
-    "clock, time, timer, watch, stopwatch": "⏱",
-    "truck, transportation, delivery, road, vehicule": "🚚",
-    "truck, transportation, delivery, road, vehicule": "🚛",
-    "key, lock, password, secure": "🔑",
-    "trophy, award, cup, competition, game, sport, winner": "🏆",
-    "win, medal, gold, silver, bronze, rank, trophy, sport, competition, game, award": "🏅",
-    "flex, muscle, body, workout, exercise": "💪",
-    "congratulations, party, popper, confetti, celebration": "🎉",
-    "ticket, prize, gift, award, prize, gift, admission": "🎟",
-    "star, gold, yellow, sky, space, night, evening, dusk": "⭐️",
-    "star, astronomy, sparkle, sparkles, magic": "✨",
-    "heart, like, favorite, love": "❤️",
-    "handshake, agreement, hands": "🤝‍",
-    "eye, vision, look, see": "👀",
-    "megaphone, announcement, broadcast, public, speaking": "📣",
-    "dice, game, chance, roll, random, target, center": "🎯",
-    "gift, present, package, box, celebrate, birthday, party": "🎁",
-    "balloon, celebration,party, birthday,": "🎈",
-    "hourglass, time, timer, watch, stopwatch": "⏳",
-    "clap, applause, bravo, hand, gesture, wave, hand clapping": "👏",
-    "clown, face, funny, lol, party, hat": "🥳",
-    "face, happy, joy, heart, love, emotion, smiley": "🥰",
-    "sunglasses, cool, smile, smiley": "😎",
-    "laughing, lol, smile, smiley": "😂",
-    "open hands, smiley, hug, love, care": "🤗",
-    "smiley, face, happy, joy, emotion, smiley": "🙂",
-  };
-
-  const toggle = () => {
-    if (open) {
-      close();
-    } else {
-      buttonRef.current.focus();
-      setOpen(true);
-    }
-  };
 
   const close = (focusAfter) => {
     setOpen(false);
@@ -98,53 +12,80 @@ const EmojiDropdown = ({ open, setOpen }) => {
     }
   };
 
-  const filteredEmojis = Object.keys(emojis)
-    .filter((key) => key.includes(search))
-    .reduce((obj, key) => {
-      obj[key] = emojis[key];
-      return obj;
-    }, {});
+  const filteredEmojis = useMemo(() => {
+    return Object.keys(emojis)
+      .filter((key) => key.includes(search))
+      .reduce((obj, key) => {
+        obj[key] = emojis[key];
+        return obj;
+      }, {});
+  }, [search]);
 
   const handleEscape = (event) => {
     if (event.key === "Escape") {
-      close(buttonRef.current);
+      close();
     }
   };
 
-  const handleClickOutside = (event) => {
-    if (panelRef.current && !panelRef.current.contains(event.target)) {
-      close(buttonRef.current);
-    }
+  const padding = 1; // Padding around each cell
+  const margin = 6; // Margin around each cell
+  const baseCellSize = 32;
+  const totalCellSize = baseCellSize + padding * 2; // Total size including padding
+  const columnCount = 8;
+
+  // Grid cell renderer
+  const Cell = ({ columnIndex, rowIndex, style }) => {
+    const emojiIndex = rowIndex * columnCount + columnIndex;
+    const emojiKey = Object.keys(filteredEmojis)[emojiIndex];
+    if (!emojiKey) return <div style={style}></div>;
+    const emoji = filteredEmojis[emojiKey];
+
+    return (
+      <button
+        style={{
+          ...style,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: `${margin}px`, // Add margin
+          padding: `${padding}px`, // Add padding
+          boxSizing: "border-box",
+          height: `${baseCellSize}px`, // Fixed height excluding margin
+          width: `${baseCellSize}px`, // Fixed width excluding margin
+        }}
+        className="cursor-pointer rounded-md bg-slate-700 hover:bg-blue-100"
+        title={emojiKey}
+        onClick={() => emojiClick(emoji)}>
+        <span className="text-lg">{emoji}</span>
+      </button>
+    );
   };
 
   return (
     <div
-      ref={panelRef}
       id="dropdown-button"
-      className="absolute left-0 mt-2 p-4 max-h-64 bg-white shadow-md overflow-scroll rounded"
+      className="left-0 mt-2 p-4 max-h-52  bg-slate-800 shadow-md rounded-lg"
       style={{ display: open ? "block" : "none", width: "24.85rem" }}
-      onKeyDown={handleEscape}
-      onMouseDown={handleClickOutside}>
+      onKeyDown={handleEscape}>
       <input
         type="search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="h-10 w-full px-2 mb-2 text-sm border border-1 border-slate-200 bg-gray-50 rounded-md placeholder:text-gray-500"
+        className="h-8 w-full px-2 mb-2 text-sm border border-1 text-slate-300 border-slate-500 bg-slate-700 rounded-md placeholder:text-gray-500"
         placeholder="Search an emoji..."
       />
-      {Object.entries(filteredEmojis).map(([keywords, emoji]) => (
-        <button
-          key={emoji}
-          className="inline-block py-2 px-3 m-1 cursor-pointer rounded-md bg-gray-100 hover:bg-blue-100"
-          title={keywords}
-          onClick={() => {
-            setInput(emoji);
-          }}>
-          <span className="inline-block w-5 h-5">{emoji}</span>
-        </button>
-      ))}
+      <Grid
+        className="overflow-y-auto"
+        columnCount={columnCount}
+        columnWidth={totalCellSize + margin * 2} // Include margin in size calculation
+        height={146}
+        rowCount={Math.ceil(Object.keys(filteredEmojis).length / columnCount)}
+        rowHeight={totalCellSize + margin * 2} // Include margin in size calculation
+        width={380}>
+        {Cell}
+      </Grid>
     </div>
   );
 };
 
-export default EmojiDropdown;
+export default EmojiSelector;
