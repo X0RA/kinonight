@@ -1,19 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { GoSignOut } from "react-icons/go";
-import {
-  BsPlay,
-  BsPause,
-  BsTrash3,
-  BsSkipBackward,
-  BsSkipForward,
-  BsVolumeDown,
-  BsArrowsFullscreen,
-  BsLockFill,
-  BsLock,
-  BsEmojiAngry,
-  BsCCircle,
-  BsShieldLock,
-} from "react-icons/bs";
+
+// icons
+import { Play, Pause, PlayForward, PlayBack } from "@styled-icons/ionicons-solid";
+import { Trash, Lock } from "@styled-icons/fa-solid";
+import { Exit } from "@styled-icons/ionicons-solid";
+import { EmojiAdd } from "@styled-icons/fluentui-system-filled";
+import { SidebarCollapse } from "@styled-icons/octicons";
+import { FullScreenMaximize } from "@styled-icons/fluentui-system-regular";
+import {Subtitles} from "@styled-icons/material-rounded/Subtitles"
+
+
 import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
 import { useAuth } from "../middleware/AuthContext";
@@ -167,43 +163,34 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
   };
 
   const requestFullscreen = () => {
-    const videoElement = playerRef.current; // Assuming this is your video element
-
-    if (!videoElement) return;
-
+    const doc = document.documentElement;
     // Check if full-screen mode is already active
     if (
       document.fullscreenElement ||
-      document.webkitFullscreenElement ||
       document.mozFullScreenElement ||
+      document.webkitFullscreenElement ||
       document.msFullscreenElement
     ) {
       // Exit full-screen mode
       if (document.exitFullscreen) {
         document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        // Safari
-        document.webkitExitFullscreen();
       } else if (document.mozCancelFullScreen) {
-        // Firefox
         document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
       } else if (document.msExitFullscreen) {
-        // IE/Edge
         document.msExitFullscreen();
       }
     } else {
       // Enter full-screen mode
-      if (videoElement.requestFullscreen) {
-        videoElement.requestFullscreen();
-      } else if (videoElement.webkitRequestFullscreen) {
-        // Safari
-        videoElement.webkitRequestFullscreen();
-      } else if (videoElement.mozRequestFullScreen) {
-        // Firefox
-        videoElement.mozRequestFullScreen();
-      } else if (videoElement.msRequestFullscreen) {
-        // IE/Edge
-        videoElement.msRequestFullscreen();
+      if (doc.requestFullscreen) {
+        doc.requestFullscreen();
+      } else if (doc.mozRequestFullScreen) {
+        doc.mozRequestFullScreen();
+      } else if (doc.webkitRequestFullscreen) {
+        doc.webkitRequestFullscreen();
+      } else if (doc.msRequestFullscreen) {
+        doc.msRequestFullscreen();
       }
     }
   };
@@ -383,7 +370,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
             isLocked ? "border-l border-b border-r" : "border-b  "
           }`}
           onClick={logOut}>
-          <GoSignOut color="slate-800" className="dark:text-slate-300" />
+          <Exit color="slate-800" className="dark:text-slate-300" />
         </button>
         {!isLocked && (
           <>
@@ -391,18 +378,18 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
             <button
               onClick={play}
               className="flex items-center justify-center w-12 h-12 bg-slate-600 border-l border-b border-r border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
-              <BsPlay color="slate-800" className="dark:text-slate-300" />
+              <Play color="slate-800" className="dark:text-slate-300" />
             </button>
 
             {/* pause button */}
             <button
               className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
               onClick={pause}>
-              <BsPause color="slate-800" className="dark:text-slate-300" />
+              <Pause color="slate-800" className="dark:text-slate-300" />
             </button>
 
             <button className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800">
-              <BsTrash3
+              <Trash
                 onClick={() => {
                   setVideoInfo({
                     video_name: "",
@@ -424,12 +411,12 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
             <button
               className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
               onClick={rewind}>
-              <BsSkipBackward color="slate-800" className="dark:text-slate-300" />
+              <PlayBack color="slate-800" className="dark:text-slate-300" />
             </button>
             <button
               className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-b border-r dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
               onClick={ff}>
-              <BsSkipForward color="slate-800" className="dark:text-slate-300" />
+              <PlayForward color="slate-800" className="dark:text-slate-300" />
             </button>
           </>
         )}
@@ -443,7 +430,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
               setShowUnlockDialog(true);
             }
           }}>
-          <BsLockFill color="slate-800" className={`${roomIsLocked ? "text-secondary-300" : "text-emerald-300"}`} />
+          <Lock color="slate-800" className={`${roomIsLocked ? "text-secondary-300" : "text-emerald-300"}`} />
         </button>
         {showLockDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -570,7 +557,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
             onClick={() => {
               toggleSubtitles();
             }}>
-            <BsCCircle color="slate-800" className="dark:text-slate-300" />
+            <Subtitles color="slate-800" className="dark:text-slate-300" />
           </button>
         )}
 
@@ -583,7 +570,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
             onClick={() => {
               setIsEmojiOpen(!isEmojiOpen);
             }}>
-            <BsEmojiAngry color="slate-800" className="dark:text-slate-300" />
+            <EmojiAdd color="slate-800" className="dark:text-slate-300" />
           </button>
 
           {isEmojiOpen && (
@@ -609,7 +596,11 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
           onClick={() => {
             setSidebar(!sidebar);
           }}>
-          <BsShieldLock color="slate-800" className={`${roomIsLocked ? "text-secondary-300" : "text-emerald-300"}`} />
+          <SidebarCollapse
+            color="slate-800"
+            // rotate sidebar
+            className={sidebar ? " dark:text-slate-300" : "dark:text-slate-300 transform rotate-180"}
+          />
         </button>
 
         {/* time info */}
@@ -635,7 +626,7 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
           <button
             className="flex items-center justify-center w-12 h-12 bg-slate-600 border-slate-700 hover:bg-slate-700 border-l border-r border-b dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800"
             onClick={requestFullscreen}>
-            <BsArrowsFullscreen color="slate-800" className="dark:text-slate-300" />
+            <FullScreenMaximize color="slate-800" className="dark:text-slate-300" />
           </button>
         </div>
       </div>

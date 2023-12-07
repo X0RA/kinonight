@@ -154,6 +154,15 @@ export const VideoJS = (props) => {
             autoPlay={true}
             playsInline={true}
           />
+          {/* <div
+            ref={controlBarRef}
+            onMouseEnter={() => {
+              adjustSubtitlePosition(true);
+            }}
+            onMouseLeave={() => {
+              adjustSubtitlePosition(false);
+            }}
+            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100"> */}
           <div
             ref={controlBarRef}
             onMouseEnter={() => {
@@ -162,16 +171,7 @@ export const VideoJS = (props) => {
             onMouseLeave={() => {
               adjustSubtitlePosition(false);
             }}
-            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100">
-            {/* <div
-            ref={controlBarRef}
-            onMouseEnter={() => {
-              adjustSubtitlePosition(true);
-            }}
-            onMouseLeave={() => {
-              adjustSubtitlePosition(false);
-            }}
-            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200"></div> */}
+            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
             <PlayerControls
               playerRef={playerRef}
               setSidebar={setDoShowSidebar}
