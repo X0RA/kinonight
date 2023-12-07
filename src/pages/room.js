@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { useUserStatus } from "../middleware/StateContext";
+import { useAuth } from "../middleware/AuthContext";
+import { processUrl } from "../components/helpers";
 import { VideoJS } from "../components/videoPlayer";
 import VideoOptionsPage from "../components/videoOptions";
-import { processUrl } from "../components/helpers";
-
-import { useAuth } from "../middleware/AuthContext";
-import { useUserStatus } from "../middleware/StateContext";
-import { uploadFile } from "../middleware/Storage";
-import { set } from "@firebase/database";
-
 import EmojiReactions from "../components/emojiReact";
 
 function Room() {
@@ -20,8 +16,7 @@ function Room() {
   const { chosenRoom, setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
   const [userInteraction, setUserInteraction] = useState(false);
 
-
-  // mouse stuff
+  // hide cursor when not in use when video is playing
   const [isCursorVisible, setIsCursorVisible] = useState(true);
   let mouseMoveTimeout;
 
@@ -133,34 +128,43 @@ function Room() {
     return opts;
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-primary-400">
+        <div className="flex flex-col items-center justify-center w-1/2 h-1/2  rounded-lg">
+          <h1 className="text-2xl font-bold">Loading...</h1>
+        </div>
+      </div>
+    );
+  }
+
   if (videoOptions == null) {
     return <VideoOptionsPage />;
-  } else {
-    if (userInteraction == false) {
-      return (
-        <>
-          <div className="flex flex-col items-center justify-center h-screen bg-primary-400">
-            <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-primary-200 rounded-lg">
-              <h1 className="text-2xl font-bold">Welcome to the room!</h1>
-              <p className="text-xl text-center pt-4 pb-4">
-                This is a button so the browser is like "yeah he can load a video" or something idk.
-              </p>
-              <button onClick={() => setUserInteraction(true)} className="w-1/4 h-1/6 bg-primary-400 rounded-lg">
-                Lets watch kino!
-              </button>
-            </div>
-          </div>
-        </>
-      );
-    } else {
-      return (
-        <div className={`${isCursorVisible ? "cursor-auto" : "cursor-none"}`}>
-          <EmojiReactions />
-          <VideoJS options={videoOptions} />
-        </div>
-      );
-    }
   }
-}
+
+  if (!userInteraction) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-primary-400">
+        <div className="flex flex-col items-center justify-center w-1/2 h-1/2 bg-primary-200 rounded-lg">
+          <h1 className="text-2xl font-bold">Welcome to the room!</h1>
+          <p className="text-xl text-center pt-4 pb-4">
+            This is a button so the browser is like "yeah he can load a video" or something idk.
+          </p>
+          <button onClick={() => setUserInteraction(true)} className="w-1/4 h-1/6 bg-primary-400 rounded-lg">
+            Lets watch kino!
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If none of the above conditions are met, render the video player
+  return (
+    <div className={`${isCursorVisible ? "cursor-auto" : "cursor-none"} bg-black`}>
+      <EmojiReactions />
+      <VideoJS options={videoOptions} />
+    </div>
+  );
+}  
 
 export default Room;

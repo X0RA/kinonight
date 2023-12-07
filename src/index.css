@@ -12,5 +12,5 @@ body {
 }
 
 body {
-  @apply bg-black;
+  @apply bg-primary-400
 }

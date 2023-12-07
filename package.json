@@ -1,6 +1,6 @@
 {
-  "name": "sammy",
-  "version": "0.1.0",
+  "name": "Kino Night",
+  "version": "0.2",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.15",
@@ -17,7 +17,7 @@
     "react": "^18.2.0",
     "react-cookie": "^4.1.1",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.9.0",
+    "react-icons": "^4.12.0",
     "react-router-dom": "^6.11.1",
     "react-scripts": "5.0.1",
     "sass": "^1.62.1",

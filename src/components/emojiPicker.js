@@ -139,7 +139,6 @@ const EmojiDropdown = ({ open, setOpen }) => {
           title={keywords}
           onClick={() => {
             setInput(emoji);
-            toggle();
           }}>
           <span className="inline-block w-5 h-5">{emoji}</span>
         </button>

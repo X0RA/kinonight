@@ -1,2 +1,2 @@
-# md-ts
-Pretty mediocre markdown to latex converter
+# Kino Night
+A lil website for video syncing

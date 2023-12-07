@@ -161,39 +161,51 @@ const PlayerControls = ({ playerRef, progress, logOut, formatTime, clearVideo, s
     }
   };
 
-  const requestFullscreen = () => {
-    const doc = document.documentElement;
+const requestFullscreen = () => {
+  const videoElement = playerRef.current; // Assuming this is your video element
 
-    // Check if full-screen mode is already active
-    if (
-      document.fullscreenElement ||
-      document.mozFullScreenElement ||
-      document.webkitFullscreenElement ||
-      document.msFullscreenElement
-    ) {
-      // Exit full-screen mode
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    } else {
-      // Enter full-screen mode
-      if (doc.requestFullscreen) {
-        doc.requestFullscreen();
-      } else if (doc.mozRequestFullScreen) {
-        doc.mozRequestFullScreen();
-      } else if (doc.webkitRequestFullscreen) {
-        doc.webkitRequestFullscreen();
-      } else if (doc.msRequestFullscreen) {
-        doc.msRequestFullscreen();
-      }
+  if (!videoElement) return;
+
+  // Check if full-screen mode is already active
+  if (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  ) {
+    // Exit full-screen mode
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      // Safari
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      // Firefox
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      // IE/Edge
+      document.msExitFullscreen();
     }
-  };
+  } else {
+    // Enter full-screen mode
+    if (videoElement.requestFullscreen) {
+      videoElement.requestFullscreen();
+    } else if (videoElement.webkitRequestFullscreen) {
+      // Safari
+      videoElement.webkitRequestFullscreen();
+    } else if (videoElement.mozRequestFullScreen) {
+      // Firefox
+      videoElement.mozRequestFullScreen();
+    } else if (videoElement.msRequestFullscreen) {
+      // IE/Edge
+      videoElement.msRequestFullscreen();
+    }
+  }
+};
+
+
+  
+  
   const handleProgressBarClick = (event) => {
     if (!isLocked) {
       const progressBar = event.currentTarget;
