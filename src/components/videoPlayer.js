@@ -7,6 +7,7 @@ import "tailwindcss/tailwind.css";
 import "./VideoPlayer.css";
 import Sidebar from "./sidebar";
 import DesktopControls from "./desktopControls";
+import MobileControls from "./mobileControls";
 
 export const VideoJS = (props) => {
   const videoRef = useRef(null);
@@ -15,7 +16,22 @@ export const VideoJS = (props) => {
   const Navigate = useNavigate();
   const { setVideoOptions } = useUserStatus();
 
-  const [doShowSidebar, setDoShowSidebar] = useState(true);
+  // mobile controls
+  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(window.navigator.userAgent);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const [doShowSidebar, setDoShowSidebar] = useState(!isMobile);
 
   const mainContentClass = doShowSidebar ? "pr-52" : "pl-0"; // pl-52 for padding left equal to the width of the sidebar
 
@@ -138,6 +154,9 @@ export const VideoJS = (props) => {
 
   return (
     <>
+      {/* portrait or landscape
+      {isMobile && isLandscape && <div className="text-white">Device is in landscape mode</div>}
+      {isMobile && !isLandscape && <div className="text-white">Device is in portrait mode</div>} */}
       {/* Sidebar */}
       <div className={`${doShowSidebar ? "absolute w-52 h-screen" : "hidden"}`}>
         <Sidebar />
@@ -151,33 +170,44 @@ export const VideoJS = (props) => {
             autoPlay={true}
             playsInline={true}
           />
-          {/* <div
-            ref={controlBarRef}
-            onMouseEnter={() => {
-              adjustSubtitlePosition(true);
-            }}
-            onMouseLeave={() => {
-              adjustSubtitlePosition(false);
-            }}
-            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100"> */}
-          <div
-            ref={controlBarRef}
-            onMouseEnter={() => {
-              adjustSubtitlePosition(true);
-            }}
-            onMouseLeave={() => {
-              adjustSubtitlePosition(false);
-            }}
-            className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <DesktopControls
+          {isMobile ? (
+            <MobileControls
               playerRef={playerRef}
               setSidebar={setDoShowSidebar}
               sidebar={doShowSidebar}
               progress={progress}
               logOut={logOut}
               clearVideo={clearVideo}
-              formatTime={formatTime}></DesktopControls>
-          </div>
+              formatTime={formatTime}></MobileControls>
+          ) : (
+            // <div
+            // ref={controlBarRef}
+            // onMouseEnter={() => {
+            //   adjustSubtitlePosition(true);
+            // }}
+            // onMouseLeave={() => {
+            //   adjustSubtitlePosition(false);
+            // }}
+            // className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-100">
+            <div
+              ref={controlBarRef}
+              onMouseEnter={() => {
+                adjustSubtitlePosition(true);
+              }}
+              onMouseLeave={() => {
+                adjustSubtitlePosition(false);
+              }}
+              className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
+              <DesktopControls
+                playerRef={playerRef}
+                setSidebar={setDoShowSidebar}
+                sidebar={doShowSidebar}
+                progress={progress}
+                logOut={logOut}
+                clearVideo={clearVideo}
+                formatTime={formatTime}></DesktopControls>
+            </div>
+          )}
         </div>
       </div>
     </>

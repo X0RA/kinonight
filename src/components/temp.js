@@ -1,8 +1,12 @@
 import React, { useState, useRef } from "react";
-
+import MobileControls from "./mobileControls";
 
 const Temp = () => {
-  return <div className="w-full h-screen  lg:pl-0 lg:justify-center pt-5 bg-primary-600"></div>;
+  return (
+      <MobileControls />
+  );
 };
 
 export default Temp;
+
+// bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200
