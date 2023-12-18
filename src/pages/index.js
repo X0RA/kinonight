@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../middleware/AuthContext";
 
+import ThemeToggle from "../components/themeToggle";
+
 import { Fragment } from "react";
 import { Transition } from "@headlessui/react";
 
@@ -86,7 +88,8 @@ function Index() {
   }, []);
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
+    <div className="flex flex-col justify-start items-center h-screen bg-primary-400 dark:bg-slate-800 space-y-8 pt-20">
+      <ThemeToggle />
       <h1 className="text-5xl font-bold text-white">Kino Night</h1>
       <div className="grid grid-cols-2 gap-4 w-64"></div>
       <div className="grid grid-cols-2 gap-4 w-64"></div>
