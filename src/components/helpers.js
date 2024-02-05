@@ -1,9 +1,18 @@
 // For processing a video we need a {"status": true/false "url": "url"} object to be returned.
 
 export const processUrl = async (url) => {
-  var putIOUrlRegExOld = new RegExp("^https://app.put.io/a-gift-from/(.*)/(.*)", "i");
-  var putIOUrlRegExNew = new RegExp("^https://app.put.io/exclusive-access/([A-Za-z0-9]+)", "i");
-  var youtubeUrlRegEx = new RegExp("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(.com)?/.+", "i");
+  var putIOUrlRegExOld = new RegExp(
+    "^https://app.put.io/a-gift-from/(.*)/(.*)",
+    "i",
+  );
+  var putIOUrlRegExNew = new RegExp(
+    "^https://app.put.io/exclusive-access/([A-Za-z0-9]+)",
+    "i",
+  );
+  var youtubeUrlRegEx = new RegExp(
+    "^(http(s)?://)?((w){3}.)?youtu(be|.be)?(.com)?/.+",
+    "i",
+  );
 
   var urlMatchPutIOOld = putIOUrlRegExOld.exec(url);
   var urlMatchPutIONew = putIOUrlRegExNew.exec(url);
@@ -29,16 +38,31 @@ const getPutIOVideoUrl = async (oauthToken) => {
   if (apiResponse.ok === false || apiResponse.status !== 200) {
     return { status: false, url: null, error: "Probably an invalid link" };
   }
+
   var jsonData = await apiResponse.json();
   // if the file is not an mp4 and or it needs to be converted
-  if (jsonData.parent.extension !== "mp4" && jsonData.parent.need_convert === true) {
+  if (
+    jsonData.parent.extension !== "mp4" &&
+    jsonData.parent.need_convert === true
+  ) {
     return { status: false, url: null, error: "There is no mp4 available yet" };
   }
   // if jsonData.parent.mp4_stream_url exists then use that, otherwise use jsonData.parent.stream_url
+  const audioTracks = jsonData.parent.media_info.streams.filter(
+    (stream) => stream.codec_type === "audio",
+  );
+
+  let hls_url = `https://api.put.io/v2/files/${jsonData.parent.id}/hls/media.m3u8?oauth_token=${oauthToken}&subtitle_languages=eng&original=0`;
+
   let data = {
     status: true,
-    url: jsonData.parent.mp4_stream_url ? jsonData.parent.mp4_stream_url : jsonData.parent.stream_url,
+    url: jsonData.parent.mp4_stream_url
+      ? jsonData.parent.mp4_stream_url
+      : jsonData.parent.stream_url,
+    audioTracks: audioTracks,
+    hls_url: hls_url,
   };
+
   return data;
 };
 

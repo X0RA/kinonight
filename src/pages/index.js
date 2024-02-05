@@ -7,7 +7,12 @@ import { Fragment } from "react";
 import { Transition } from "@headlessui/react";
 
 function Index() {
-  const [cookies, setCookie] = useCookies(["room", "accountName", "password", "displayName"]);
+  const [cookies, setCookie] = useCookies([
+    "room",
+    "accountName",
+    "password",
+    "displayName",
+  ]);
   const [accountName, setAccountName] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -18,13 +23,22 @@ function Index() {
 
   const handleJoin = async () => {
     if (!currentUser) {
-      let res = await loginOrSignUp(accountName + "@xkiinonight.web.app", password);
+      let res = await loginOrSignUp(
+        accountName + "@xkiinonight.web.app",
+        password,
+      );
       if (res.status) {
         await setUsername(displayName);
         if (room && room.trim() !== "") {
-          setCookie("accountName", accountName, { path: "/", sameSite: "Strict" });
+          setCookie("accountName", accountName, {
+            path: "/",
+            sameSite: "Strict",
+          });
           setCookie("password", password, { path: "/", sameSite: "Strict" });
-          setCookie("displayName", displayName, { path: "/", sameSite: "Strict" });
+          setCookie("displayName", displayName, {
+            path: "/",
+            sameSite: "Strict",
+          });
           navigate("/room/" + room);
         } else {
           setError(["Enter a proper room name", ...error]);
@@ -49,7 +63,8 @@ function Index() {
 
   function generateRandomString(length) {
     let result = "";
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -86,18 +101,20 @@ function Index() {
   }, []);
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
-      <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
+    <div className="bg-primary-400 flex h-screen flex-col items-center justify-start space-y-8 pt-20">
+      {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
         TEST
-      </button>
+      </button> */}
       <h1 className="text-5xl font-bold text-white">Kino Night</h1>
-      <div className="grid grid-cols-2 gap-4 w-64"></div>
-      <div className="grid grid-cols-2 gap-4 w-64"></div>
-      <div className="grid grid-cols-4 gap-4 sm:w-5/12 w-full p-5 sm:p-0">
+      <div className="grid w-64 grid-cols-2 gap-4"></div>
+      <div className="grid w-64 grid-cols-2 gap-4"></div>
+      <div className="grid w-full grid-cols-4 gap-4 p-5 sm:w-5/12 sm:p-0">
         {/* conditional if logged in */}
         {currentUser && (
           <>
-            <div className="col-span-4 text-white text-center w-full">Logged in as {currentUser.displayName}</div>
+            <div className="col-span-4 w-full text-center text-white">
+              Logged in as {currentUser.displayName}
+            </div>
           </>
         )}
 
@@ -105,7 +122,7 @@ function Index() {
         <div className="col-span-2">
           <h2 className="text-xl text-white">Username</h2>
           <input
-            className="mt-2 p-2 rounded-lg w-full bg-white"
+            className="mt-2 w-full rounded-lg bg-white p-2"
             value={displayName}
             onChange={(e) => {
               const val = e.target.value;
@@ -124,7 +141,7 @@ function Index() {
         <div className="col-span-2">
           <h2 className="text-xl text-white">Room name</h2>
           <input
-            className="mt-2 p-2 rounded-lg w-full bg-white"
+            className="mt-2 w-full rounded-lg bg-white p-2"
             value={room}
             onChange={(e) => setRoom(e.target.value.toLowerCase())}
             type="text"
@@ -133,7 +150,10 @@ function Index() {
         </div>
         {/* join button */}
         <div className={currentUser ? "col-span-4" : "col-span-4"}>
-          <button className="mt-2 p-2 rounded-lg bg-white w-full text-primary-400 font-bold" onClick={handleJoin}>
+          <button
+            className="text-primary-400 mt-2 w-full rounded-lg bg-white p-2 font-bold"
+            onClick={handleJoin}
+          >
             Join
           </button>
         </div>
@@ -146,14 +166,15 @@ function Index() {
           enterTo="opacity-100 scale-100"
           leave="transition ease-in duration-200"
           leaveFrom="opacity-100 scale-100"
-          leaveTo="opacity-0 scale-95">
-          <div className=" rounded-lg fixed top-0 right-0 m-4 pointer-events-none bg-primary-900">
-            <div className="max-w-sm w-full bg-red-500 rounded-lg shadow-lg pointer-events-auto">
+          leaveTo="opacity-0 scale-95"
+        >
+          <div className=" bg-primary-900 pointer-events-none fixed right-0 top-0 m-4 rounded-lg">
+            <div className="pointer-events-auto w-full max-w-sm rounded-lg bg-red-500 shadow-lg">
               <div className="p-4">
                 {error.map((errorMessage, index) => (
                   <Fragment key={index}>
                     <div className="mb-2 ">
-                      <p className="text-white text-sm">{errorMessage}</p>
+                      <p className="text-sm text-white">{errorMessage}</p>
                     </div>
                   </Fragment>
                 ))}

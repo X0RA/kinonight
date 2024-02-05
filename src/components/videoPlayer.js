@@ -17,7 +17,9 @@ export const VideoJS = (props) => {
   const { setVideoOptions } = useUserStatus();
 
   // mobile controls
-  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+  const [isLandscape, setIsLandscape] = useState(
+    window.innerWidth > window.innerHeight,
+  );
   const isMobile = /iPhone|iPad|iPod|Android/i.test(window.navigator.userAgent);
   useEffect(() => {
     const handleResize = () => {
@@ -30,6 +32,14 @@ export const VideoJS = (props) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      console.log("Mobile device detected");
+    } else {
+      console.log("Desktop device detected");
+    }
+  }, [isMobile]);
 
   const [doShowSidebar, setDoShowSidebar] = useState(!isMobile);
 
@@ -54,7 +64,10 @@ export const VideoJS = (props) => {
         };
 
         observerRef.current = new MutationObserver(observerCallback);
-        observerRef.current.observe(targetNode, { childList: true, subtree: true });
+        observerRef.current.observe(targetNode, {
+          childList: true,
+          subtree: true,
+        });
       } else if (!targetNode) {
         setTimeout(checkAndObserve, 1000);
       }
@@ -79,7 +92,10 @@ export const VideoJS = (props) => {
       const style = window.getComputedStyle(subDisplay);
       const insetHeight = style.getPropertyValue("inset");
       const cueHeight = parseInt(insetHeight.split(" ")[0].replace("px", ""));
-      const subtitleOffset = alteredSub !== null ? ` ${cueHeight + 68}px 0px 0px` : ` ${cueHeight - 68}px 0px 0px`;
+      const subtitleOffset =
+        alteredSub !== null
+          ? ` ${cueHeight + 68}px 0px 0px`
+          : ` ${cueHeight - 68}px 0px 0px`;
 
       if (doMove) {
         subDisplay.style.setProperty("inset", subtitleOffset);
@@ -93,13 +109,22 @@ export const VideoJS = (props) => {
   };
 
   // Define state for video progress
-  const [progress, setProgress] = useState({ current: 0, duration: 0, percentage: 0 });
+  const [progress, setProgress] = useState({
+    current: 0,
+    duration: 0,
+    percentage: 0,
+  });
 
   useEffect(() => {
     if (!playerRef.current) {
       const videoElement = document.createElement("video-js");
 
-      videoElement.classList.add("video-js", "vjs-default-skin", "vjs-16-9", "vjs-big-play-centered");
+      videoElement.classList.add(
+        "video-js",
+        "vjs-default-skin",
+        "vjs-16-9",
+        "vjs-big-play-centered",
+      );
 
       videoElement.style.width = "100%";
       videoElement.style.height = "100%";
@@ -158,14 +183,17 @@ export const VideoJS = (props) => {
       {isMobile && isLandscape && <div className="text-white">Device is in landscape mode</div>}
       {isMobile && !isLandscape && <div className="text-white">Device is in portrait mode</div>} */}
       {/* Sidebar */}
-      <div className={`${doShowSidebar ? "absolute w-52 h-screen" : "hidden"}`}>
+      <div className={`${doShowSidebar ? "absolute h-screen w-52" : "hidden"}`}>
         <Sidebar />
       </div>
-      <div className={`w-full h-screen ${mainContentClass}`}>
-        <div data-vjs-player className="w-full h-full flex items-center justify-center bg-black relative">
+      <div className={`h-screen w-full ${mainContentClass}`}>
+        <div
+          data-vjs-player
+          className="relative flex h-full w-full items-center justify-center bg-black"
+        >
           <div
             ref={videoRef}
-            className="w-full aspect-[16/9] max-h-screen object-cover"
+            className="aspect-[16/9] max-h-screen w-full object-cover"
             style={{ maxWidth: "calc(100vh * 16 / 9)" }}
             autoPlay={true}
             playsInline={true}
@@ -178,7 +206,8 @@ export const VideoJS = (props) => {
               progress={progress}
               logOut={logOut}
               clearVideo={clearVideo}
-              formatTime={formatTime}></MobileControls>
+              formatTime={formatTime}
+            ></MobileControls>
           ) : (
             // <div
             // ref={controlBarRef}
@@ -197,7 +226,8 @@ export const VideoJS = (props) => {
               onMouseLeave={() => {
                 adjustSubtitlePosition(false);
               }}
-              className="control-bar bg-primary-500 h-18 w-full absolute bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200">
+              className="control-bar bg-primary-500 h-18 absolute bottom-0 w-full opacity-0 transition-opacity duration-200 hover:opacity-100"
+            >
               <DesktopControls
                 playerRef={playerRef}
                 setSidebar={setDoShowSidebar}
@@ -205,7 +235,8 @@ export const VideoJS = (props) => {
                 progress={progress}
                 logOut={logOut}
                 clearVideo={clearVideo}
-                formatTime={formatTime}></DesktopControls>
+                formatTime={formatTime}
+              ></DesktopControls>
             </div>
           )}
         </div>
