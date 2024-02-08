@@ -354,7 +354,14 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     "flex items-center w-11 h-11 justify-center bg-slate-600 border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800";
   const lhsButtons = {
     exit: {
-      icon: <Exit color="slate-800" className="dark:text-slate-300 w-5" title="Exit" />,
+      icon: (
+        <button
+          data-tooltip-target="tooltip-exit"
+          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          <Exit color="slate-800" className="dark:text-slate-300 w-5" />
+        </button>
+      ),
+      tooltip: "Exit",
       onClick: () => {
         logOut();
       },
@@ -364,6 +371,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     },
     trash: {
       icon: <Trash onClick={() => {}} color="slate-800" className="dark:text-slate-300 w-4" title="Remove Video" />,
+      tooltip: "Remove Video",
       onClick: () => {
         setVideoInfo({
           video_name: "",
@@ -385,14 +393,15 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       icon:
         roomState && roomState.is_playing !== undefined ? (
           roomState.is_playing ? (
-            <Pause color="slate-800" className="dark:text-slate-300 w-5" title="Pause" />
+            <Pause color="slate-800" className="dark:text-slate-300 w-5" />
           ) : (
-            <Play color="slate-800" className="dark:text-slate-300 w-5" title="Play" />
+            <Play color="slate-800" className="dark:text-slate-300 w-5" />
           )
         ) : (
           // Default icon if roomState or is_playing is undefined
-          <Play color="slate-800" className="dark:text-slate-300 w-5" title="Pause" />
+          <Play color="slate-800" className="dark:text-slate-300 w-5" />
         ),
+      tooltip: roomState.is_playing ? "Pause" : "Play",
       onClick: () => {
         if (roomState && roomState.is_playing !== undefined) {
           if (roomState.is_playing) {
@@ -408,7 +417,8 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     playBack: {
-      icon: <PlayBack color="slate-800" className="dark:text-slate-300 w-5" title="Rewind 30 seconds" />,
+      icon: <PlayBack color="slate-800" className="dark:text-slate-300 w-5" />,
+      tooltip: "Rewind 30 seconds",
       onClick: () => {
         rewind();
       },
@@ -416,7 +426,8 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     playForward: {
-      icon: <PlayForward color="slate-800" className="dark:text-slate-300 w-5" title="Fast forward 30 seconds" />,
+      icon: <PlayForward color="slate-800" className="dark:text-slate-300 w-5" />,
+      tooltip: "Fast forward 30 seconds",
       onClick: () => {
         ff();
       },
@@ -437,6 +448,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
           title="Unlock controls (self)"
         />
       ),
+      tooltip: roomIsLocked ? "Lock Controls" : "Unlock controls (self)",
       onClick: () => {
         if (isLocked) {
           setShowUnlockDialog(true);
@@ -449,6 +461,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     },
     subtitles: {
       icon: <Subtitles color="slate-800" className="dark:text-slate-300 w-5" title="Toggle Subtitles" />,
+      tooltip: "Toggle Subtitles",
       onClick: () => {
         toggleSubtitles();
       },
@@ -464,6 +477,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
           title="Toggle emoji panel"
         />
       ),
+      tooltip: "Emoji Panel",
       onClick: () => setIsEmojiOpen(!isEmojiOpen),
       className: `${buttonCSS}`,
       disabled: false,
@@ -476,15 +490,16 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
         <SidebarCollapse
           color="slate-800"
           className={`dark:text-slate-300 ${sidebar ? "" : "transform rotate-180"} w-5`}
-          title={sidebar ? "Collapse Sidebar" : "Open Sidebar"}
         />
       ),
+      tooltip: sidebar ? "Collapse Sidebar" : "Open Sidebar",
       onClick: () => setSidebar(!sidebar),
       className: `${buttonCSS}`,
       disabled: false,
     },
     fullScreen: {
-      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6" title="Fullscreen Video" />,
+      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6" />,
+      tooltip: "Toggle Fullscreen",
       onClick: () => {
         requestFullscreen();
       },
@@ -681,13 +696,22 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
                 return null;
               } else {
                 return (
-                  <button
-                    key={key}
-                    className={lhsButtons[key].className}
-                    onClick={lhsButtons[key].onClick}
-                    disabled={lhsButtons[key].disabled}>
-                    {lhsButtons[key].icon}
-                  </button>
+                  <div key={key} className="relative">
+                    <button
+                      data-tooltip-target={`tooltip-${key}`}
+                      className={lhsButtons[key].className}
+                      onClick={lhsButtons[key].onClick}
+                      disabled={lhsButtons[key].disabled}>
+                      {lhsButtons[key].icon}
+                    </button>
+                    <div
+                      id={`tooltip-${key}`}
+                      role="tooltip"
+                      className="whitespace-nowrap absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700 bottom-full">
+                      {lhsButtons[key].tooltip ? lhsButtons[key].tooltip : ""}
+                      <div className="tooltip-arrow" data-popper-arrow></div>
+                    </div>
+                  </div>
                 );
               }
             })}
@@ -707,7 +731,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
           <div className="flex space-x-0">
             <button
               title="Sync offset"
-              className={`pl-6 relative overflow-hidden flex items-center justify-center w-auto min-w-fit h-11 hover:bg-slate-700 dark:bg-slate-900  dark:hover:bg-slate-800 dark:text-slate-300  rounded-full ${
+              className={` rounded-full pl-6 relative overflow-hidden flex items-center justify-center w-auto min-w-fit h-11 hover:bg-slate-700 dark:bg-slate-900  dark:hover:bg-slate-800 dark:text-slate-300   ${
                 msOffsetMessage.sync ? "" : "pr-2"
               }`}
               onClick={() => {
@@ -744,3 +768,24 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
 };
 
 export default DesktopControls;
+// {Object.keys(rhsButtons).map((key) => {
+//   return (
+//     <div key={key} className="relative">
+//       <button
+//         data-tooltip-target={`tooltip-${key}`}
+//         key={key}
+//         className={rhsButtons[key].className}
+//         onClick={rhsButtons[key].onClick}
+//         disabled={rhsButtons[key].disabled}>
+//         {rhsButtons[key].icon}
+//       </button>
+      // <div
+      //   id={`tooltip-${key}`}
+      //   role="tooltip"
+      //   className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700 bottom-full whitespace-nowrap">
+      //   {rhsButtons[key].tooltip ? rhsButtons[key].tooltip : ""}
+      //   <div className="tooltip-arrow" data-popper-arrow></div>
+      // </div>
+//     </div>
+//   );
+// })}
