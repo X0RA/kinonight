@@ -354,7 +354,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     "flex items-center w-11 h-11 justify-center bg-slate-600 border-slate-700 hover:bg-slate-700 dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800";
   const lhsButtons = {
     exit: {
-      icon: <Exit color="slate-800" className="dark:text-slate-300 w-5" />,
+      icon: <Exit color="slate-800" className="dark:text-slate-300 w-5" title="Exit" />,
       onClick: () => {
         logOut();
       },
@@ -363,7 +363,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     trash: {
-      icon: <Trash onClick={() => {}} color="slate-800" className="dark:text-slate-300 w-4" />,
+      icon: <Trash onClick={() => {}} color="slate-800" className="dark:text-slate-300 w-4" title="Remove Video" />,
       onClick: () => {
         setVideoInfo({
           video_name: "",
@@ -385,13 +385,13 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       icon:
         roomState && roomState.is_playing !== undefined ? (
           roomState.is_playing ? (
-            <Pause color="slate-800" className="dark:text-slate-300 w-5" />
+            <Pause color="slate-800" className="dark:text-slate-300 w-5" title="Pause" />
           ) : (
-            <Play color="slate-800" className="dark:text-slate-300 w-5" />
+            <Play color="slate-800" className="dark:text-slate-300 w-5" title="Play" />
           )
         ) : (
           // Default icon if roomState or is_playing is undefined
-          <Play color="slate-800" className="dark:text-slate-300 w-5" />
+          <Play color="slate-800" className="dark:text-slate-300 w-5" title="Pause" />
         ),
       onClick: () => {
         if (roomState && roomState.is_playing !== undefined) {
@@ -408,7 +408,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     playBack: {
-      icon: <PlayBack color="slate-800" className="dark:text-slate-300 w-5" />,
+      icon: <PlayBack color="slate-800" className="dark:text-slate-300 w-5" title="Rewind 30 seconds" />,
       onClick: () => {
         rewind();
       },
@@ -416,7 +416,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     playForward: {
-      icon: <PlayForward color="slate-800" className="dark:text-slate-300 w-5" />,
+      icon: <PlayForward color="slate-800" className="dark:text-slate-300 w-5" title="Fast forward 30 seconds" />,
       onClick: () => {
         ff();
       },
@@ -425,9 +425,17 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     },
     lock: {
       icon: roomIsLocked ? (
-        <Lock color="slate-800" className={`${isLocked ? "text-slate-300" : "text-emerald-300"} w-4`} />
+        <Lock
+          color="slate-800"
+          className={`${isLocked ? "text-slate-300" : "text-emerald-300"} w-4`}
+          title="Lock Controls"
+        />
       ) : (
-        <Unlock color="slate-800" className={`${isLocked ? "text-secondary-300" : "text-slate-300"} w-4`} />
+        <Unlock
+          color="slate-800"
+          className={`${isLocked ? "text-secondary-300" : "text-slate-300"} w-4`}
+          title="Unlock controls (self)"
+        />
       ),
       onClick: () => {
         if (isLocked) {
@@ -440,7 +448,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     subtitles: {
-      icon: <Subtitles color="slate-800" className="dark:text-slate-300 w-5" />,
+      icon: <Subtitles color="slate-800" className="dark:text-slate-300 w-5" title="Toggle Subtitles" />,
       onClick: () => {
         toggleSubtitles();
       },
@@ -448,7 +456,14 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: !videoInfo.subtitle_url,
     },
     emojiAdd: {
-      icon: <EmojiAdd ref={emojiToggleButtonRef} color="slate-800" className="dark:text-slate-300 w-5" />,
+      icon: (
+        <EmojiAdd
+          ref={emojiToggleButtonRef}
+          color="slate-800"
+          className="dark:text-slate-300 w-5"
+          title="Toggle emoji panel"
+        />
+      ),
       onClick: () => setIsEmojiOpen(!isEmojiOpen),
       className: `${buttonCSS}`,
       disabled: false,
@@ -458,10 +473,10 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
   const rhsButtons = {
     sidebarCollapse: {
       icon: (
-        // <SidebarCollapse color="slate-800" className={`dark:text-slate-300 ${sidebar ? "" : "transform rotate-180"}`} />
         <SidebarCollapse
           color="slate-800"
           className={`dark:text-slate-300 ${sidebar ? "" : "transform rotate-180"} w-5`}
+          title={sidebar ? "Collapse Sidebar" : "Open Sidebar"}
         />
       ),
       onClick: () => setSidebar(!sidebar),
@@ -469,7 +484,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     fullScreen: {
-      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6" />,
+      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6" title="Fullscreen Video" />,
       onClick: () => {
         requestFullscreen();
       },
@@ -678,6 +693,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
             })}
             {/* time info */}
             <button
+              title={showTimeLeft ? "Show time elapsed" : "Show time left"}
               className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-11 bg-slate-600 border-slate-700 hover:bg-slate-700 border- dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 "
               onClick={() => {
                 setShowTimeLeft(!showTimeLeft);
@@ -690,6 +706,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
           {/* bottom rhs buttons */}
           <div className="flex space-x-0">
             <button
+              title="Sync offset"
               className={`pl-6 relative overflow-hidden flex items-center justify-center w-auto min-w-fit h-11 hover:bg-slate-700 dark:bg-slate-900  dark:hover:bg-slate-800 dark:text-slate-300  rounded-full ${
                 msOffsetMessage.sync ? "" : "pr-2"
               }`}
