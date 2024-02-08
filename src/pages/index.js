@@ -87,9 +87,9 @@ function Index() {
 
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
-      <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
+      {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
         TEST
-      </button>
+      </button> */}
       <h1 className="text-5xl font-bold text-white">Kino Night</h1>
       <div className="grid grid-cols-2 gap-4 w-64"></div>
       <div className="grid grid-cols-2 gap-4 w-64"></div>

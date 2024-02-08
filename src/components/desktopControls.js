@@ -370,7 +370,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     trash: {
-      icon: <Trash onClick={() => {}} color="slate-800" className="dark:text-slate-300 w-4" title="Remove Video" />,
+      icon: <Trash onClick={() => {}} color="slate-800" className="dark:text-slate-300 w-4" />,
       tooltip: "Remove Video",
       onClick: () => {
         setVideoInfo({
@@ -436,17 +436,9 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     },
     lock: {
       icon: roomIsLocked ? (
-        <Lock
-          color="slate-800"
-          className={`${isLocked ? "text-slate-300" : "text-emerald-300"} w-4`}
-          title="Lock Controls"
-        />
+        <Lock color="slate-800" className={`${isLocked ? "text-slate-300" : "text-emerald-300"} w-4`} />
       ) : (
-        <Unlock
-          color="slate-800"
-          className={`${isLocked ? "text-secondary-300" : "text-slate-300"} w-4`}
-          title="Unlock controls (self)"
-        />
+        <Unlock color="slate-800" className={`${isLocked ? "text-secondary-300" : "text-slate-300"} w-4`} />
       ),
       tooltip: roomIsLocked ? "Lock Controls" : "Unlock controls (self)",
       onClick: () => {
@@ -460,7 +452,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     subtitles: {
-      icon: <Subtitles color="slate-800" className="dark:text-slate-300 w-5" title="Toggle Subtitles" />,
+      icon: <Subtitles color="slate-800" className="dark:text-slate-300 w-5" />,
       tooltip: "Toggle Subtitles",
       onClick: () => {
         toggleSubtitles();
@@ -469,14 +461,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: !videoInfo.subtitle_url,
     },
     emojiAdd: {
-      icon: (
-        <EmojiAdd
-          ref={emojiToggleButtonRef}
-          color="slate-800"
-          className="dark:text-slate-300 w-5"
-          title="Toggle emoji panel"
-        />
-      ),
+      icon: <EmojiAdd ref={emojiToggleButtonRef} color="slate-800" className="dark:text-slate-300 w-5" />,
       tooltip: "Emoji Panel",
       onClick: () => setIsEmojiOpen(!isEmojiOpen),
       className: `${buttonCSS}`,
@@ -762,7 +747,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
                   <div
                     id={`tooltip-${key}`}
                     role="tooltip"
-                    className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700 bottom-full whitespace-nowrap">
+                    className="absolute z-20 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700 bottom-full whitespace-nowrap">
                     {rhsButtons[key].tooltip ? rhsButtons[key].tooltip : ""}
                     <div className="tooltip-arrow" data-popper-arrow></div>
                   </div>
