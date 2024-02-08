@@ -4,8 +4,8 @@ import { useUserStatus } from "../middleware/StateContext";
 import { processUrl } from "./helpers";
 import { uploadFile } from "../middleware/Storage";
 
-export default function VideoOptionsPage({ roomName }) {
-  const { setChosenRoom, connectedUsers, setVideoInfo, setRoomState } = useUserStatus();
+export default function VideoOptionsPage() {
+  const { setChosenRoom, connectedUsers, setVideoInfo, setRoomState, chosenRoom } = useUserStatus();
   const navigate = useNavigate();
 
   const [newInfo, setNewInfo] = useState({ video_url: "", subtitle_url: "" });
@@ -73,7 +73,7 @@ export default function VideoOptionsPage({ roomName }) {
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
       <h1 className="text-5xl font-bold text-white">Kino Night</h1>
-      <h2 className="text-2xl font-bold text-white">{roomName}</h2>
+      <h4 className="text-1xl font-bold text-white"> Room: {chosenRoom}</h4>
       <ConnectedUsersDisplay connectedUsers={connectedUsers} />
 
       {/* Form for setting video and subtitle URLs */}
