@@ -1,6 +1,6 @@
 {
   "name": "kino-night",
-  "version": "0.2",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.18",
