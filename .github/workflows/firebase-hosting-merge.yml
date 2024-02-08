@@ -11,10 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14' # Adjust this to match the version of Node.js your project uses
+      - name: Install Dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_XKIINONIGHT }}'
-          channelId: live
+          channelId: live # Only include this if you are deploying to a preview channel, otherwise remove it for live channel deployment
           projectId: xkiinonight
