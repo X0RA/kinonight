@@ -1,27 +1,27 @@
 {
-  "name": "Kino Night",
-  "version": "0.2",
+  "name": "kino-night",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@headlessui/react": "^1.7.15",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@headlessui/react": "^1.7.18",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.1",
+    "@testing-library/user-event": "^14.5.2",
     "animejs": "^3.2.2",
-    "axios": "^1.4.0",
-    "css.gg": "^2.0.0",
-    "emoji-picker-element": "^1.19.2",
-    "emoji-picker-react": "^4.5.16",
-    "firebase": "^9.22.1",
+    "axios": "^1.6.7",
+    "css.gg": "^2.1.1",
+    "emoji-picker-element": "^1.21.0",
+    "emoji-picker-react": "^4.7.12",
+    "firebase": "^10.8.0",
     "fs": "^0.0.1-security",
     "react": "^18.2.0",
-    "react-cookie": "^4.1.1",
+    "react-cookie": "^7.0.2",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.12.0",
-    "react-router-dom": "^6.11.1",
-    "react-scripts": "5.0.1",
+    "react-icons": "^5.0.1",
+    "react-router-dom": "^6.22.0",
+    "react-scripts": "^5.0.1",
     "react-window": "^1.8.10",
-    "sass": "^1.62.1",
+    "sass": "^1.70.0",
     "styled-components": "^5.3.11",
     "styled-icons": "^10.47.0",
     "tailwind": "^4.0.0",
@@ -30,7 +30,7 @@
     "web-vitals": "^2.1.4",
     "youtube-info-streams": "^1.0.8",
     "youtube-parser2": "^1.0.1",
-    "ytdl-core": "^4.11.4"
+    "ytdl-core": "^4.11.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -57,6 +57,6 @@
     ]
   },
   "devDependencies": {
-    "tailwindcss": "^3.3.2"
+    "tailwindcss": "^3.4.1"
   }
 }

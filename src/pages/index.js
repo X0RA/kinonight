@@ -104,6 +104,9 @@ function Index() {
     <div className="bg-primary-400 flex h-screen flex-col items-center justify-start space-y-8 pt-20">
       {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
         TEST
+    <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
+      {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
+        BIG HUGE TEST
       </button> */}
       <h1 className="text-5xl font-bold text-white">Kino Night</h1>
       <div className="grid w-64 grid-cols-2 gap-4"></div>
