@@ -1,12 +1,10 @@
-import React, { useState, useRef } from "react";
-import MobileControls from "./mobileControls";
+// import MobileControls from "./mobileControls";
 
-const Temp = () => {
-  return (
-      <MobileControls />
-  );
-};
+// const Temp = () => {
+//   return (
+//       <MobileControls />
+//   );
+// };
 
-export default Temp;
-
+// export default Temp;
 // bottom-0 opacity-0 hover:opacity-100 transition-opacity duration-200
