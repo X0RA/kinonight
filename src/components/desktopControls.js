@@ -7,6 +7,7 @@ import { Exit } from "@styled-icons/ionicons-solid";
 import { EmojiAdd } from "@styled-icons/fluentui-system-filled";
 import { SidebarCollapse } from "@styled-icons/octicons";
 import { FullScreenMaximize } from "@styled-icons/fluentui-system-regular";
+import { Audiotrack } from "@styled-icons/material-rounded";
 import { Subtitles } from "@styled-icons/material-rounded/Subtitles";
 import { VolumeMute, VolumeDown, VolumeUp } from "@styled-icons/evaicons-solid";
 import "./desktopControls.css";
@@ -28,6 +29,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
   const [showLockDialog, setShowLockDialog] = useState(false);
   const [lockPassword, setLockPassword] = useState("");
   const [showUnlockDiaglog, setShowUnlockDialog] = useState(false);
+  const [currentAudioTrack, setCurrentAudioTrack] = useState(0);
 
   const setPasswordLock = async () => {
     try {
@@ -444,8 +446,28 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       onClick: () => {
         toggleSubtitles();
       },
-      className: `${buttonCSS}`,
-      disabled: !videoInfo.subtitle_url,
+      className: `${buttonCSS} ${!videoInfo.subtitle_url ? "hidden" : ""}`,
+      disabled: false,
+    },
+    audioSelect: {
+      icon: (
+        <div>
+          <Audiotrack color="slate-800" className="dark:text-slate-300 w-5"></Audiotrack>
+          <p className="text-white">{currentAudioTrack}</p>
+        </div>
+      ),
+      onClick: () => {
+        const tracks = playerRef.current?.audioTracks();
+        if (tracks && tracks.length > 1) {
+          const current = currentAudioTrack;
+          const next = (current + 1) % tracks.length;
+          tracks[current].enabled = false;
+          tracks[next].enabled = true;
+          setCurrentAudioTrack(next);
+        }
+      },
+      className: `${buttonCSS} ${playerRef.current?.audioTracks()?.length > 1 ? "" : "hidden"}`,
+      disabled: false,
     },
     emojiAdd: {
       icon: <EmojiAdd ref={emojiToggleButtonRef} color="slate-800" className="dark:text-slate-300 w-5" />,
