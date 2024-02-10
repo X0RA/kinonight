@@ -8,9 +8,10 @@ export default function VideoOptionsPage({ roomName }) {
   const { setChosenRoom, connectedUsers, setVideoInfo, setRoomState } = useUserStatus();
   const navigate = useNavigate();
 
-  const [newInfo, setNewInfo] = useState({ video_url: "", subtitle_url: "" });
+  const [newInfo, setNewInfo] = useState({ video_url: "", subtitle_url: "", hls: false });
   const [file, setFile] = useState(null);
   const [hover, setHover] = useState(false);
+  const [ShowOptions, setShowOptions] = useState(false);
 
   const handleInputChange = (e) => {
     setNewInfo({ ...newInfo, [e.target.name]: e.target.value });
@@ -46,6 +47,7 @@ export default function VideoOptionsPage({ roomName }) {
 
     if (updatedInfo.video_url) {
       let validFile = await processUrl(updatedInfo.video_url);
+      // hls stuff here
       if (!validFile.status) {
         alert("Invalid URL");
         return;
@@ -72,6 +74,28 @@ export default function VideoOptionsPage({ roomName }) {
   };
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
+      {/* add a settings button in the top right */}
+      <div className="absolute top-5 right-5">
+        <button
+          className="p-2 rounded-lg bg-white text-primary-400 font-bold"
+          onClick={() => setShowOptions(!ShowOptions)}>
+          Settings
+        </button>
+        {/* if show options then show a tickbox button for "allow hls" */}
+        <div className={`${ShowOptions ? "block" : "hidden"} absolute top-10 right-0`}>
+          <input
+            type="checkbox"
+            id="hls"
+            name="hls"
+            value="hls"
+            onChange={() => setNewInfo({ ...newInfo, hls: !newInfo.hls })}
+          />
+          <label htmlFor="hls" className="text-white">
+            Force HLS
+          </label>
+        </div>
+      </div>
+      {/* normal buttons */}
       <h1 className="text-5xl font-bold text-white">Kino Night</h1>
       <h2 className="text-2xl font-bold text-white">{roomName}</h2>
       <ConnectedUsersDisplay connectedUsers={connectedUsers} />

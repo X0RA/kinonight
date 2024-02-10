@@ -97,20 +97,19 @@ function Room() {
     if (!videoUrl.status) {
       return;
     }
-
-    const opts = createVideoOptions(videoUrl.url, options.subtitle_url);
+    const opts = createVideoOptions(options.hls ? videoUrl.hls_url : videoUrl.url, options.subtitle_url, options.hls);
     setVideoOptions(opts);
   };
 
   // Helper to create video player options
-  const createVideoOptions = (videoUrl, subtitleUrl) => {
+  const createVideoOptions = (videoUrl, subtitleUrl, hls) => {
     const opts = {
       autoplay: true,
       controls: false,
       responsive: true,
       fluid: true,
       playsinline: true,
-      sources: [{ src: videoUrl, type: "video/mp4" }],
+      sources: [{ src: videoUrl, type: hls ? "application/x-mpegURL" : "video/mp4" }],
     };
 
     if (subtitleUrl) {

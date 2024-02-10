@@ -15,53 +15,60 @@ import "video.js/dist/video-js.css";
 function Temp() {
   const videoRef = useRef(null);
   const [audioTrackIndex, setAudioTrackIndex] = useState(0); // Track the current audio track index
+  const [player, setPlayer] = useState(null);
+
+  // Function to switch audio tracks
+  const switchAudioTrack = () => {
+    if (player) {
+      const tracks = player.audioTracks();
+      if (tracks && tracks.length > 1) {
+        const currentTrackIndex = audioTrackIndex;
+        const nextTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        tracks[currentTrackIndex].enabled = false;
+        tracks[nextTrackIndex].enabled = true;
+        setAudioTrackIndex(nextTrackIndex); // Update the state to reflect the new track index
+      }
+    }
+  };
 
   useEffect(() => {
-    const player = videojs(videoRef.current, {
-      techOrder: ["html5"],
+    const videoPlayer = videojs(videoRef.current, {
+      // techOrder: ["html5"],
       sources: [
         {
-          src: "https://api.put.io/v2/files/1316149227/hls/media.m3u8?oauth_token=2RB4XYV7IK54HDGTS2KH&subtitle_languages=eng&original=0",
+          src: "https://api.put.io/v2/files/1316149227/hls/media.m3u8?oauth_token=S2KDKUUNE6EYKVHHTV43&subtitle_languages=eng&original=0",
           type: "application/x-mpegURL",
         },
       ],
     });
 
-    player.ready(function () {
+    videoPlayer.ready(function () {
       // Add custom button for audio track switching
-      const button = player.controlBar.addChild("button");
+      const button = videoPlayer.controlBar.addChild("button");
       button.addClass("vjs-icon-audio");
       button.el().innerText = "Switch Audio";
-      button.on("click", function () {
-        switchAudioTrack(player);
-      });
+      button.on("click", switchAudioTrack);
 
       // Log audio tracks here
-      const tracks = player.audioTracks();
+      const tracks = videoPlayer.audioTracks();
       console.log(tracks);
       for (let i = 0; i < tracks.length; i++) {
         console.log(`Track ${i}:`, tracks[i].label);
       }
     });
 
+    setPlayer(videoPlayer);
+
     return () => {
-      if (player) {
-        player.dispose();
+      if (videoPlayer) {
+        videoPlayer.dispose();
       }
     };
   }, []);
 
-  // Function to switch audio tracks
-  const switchAudioTrack = (player) => {
-    const tracks = player.audioTracks();
-    if (tracks && tracks.length > 1) {
-      const currentTrackIndex = audioTrackIndex;
-      const nextTrackIndex = (currentTrackIndex + 1) % tracks.length;
-      tracks[currentTrackIndex].enabled = false;
-      tracks[nextTrackIndex].enabled = true;
-      setAudioTrackIndex(nextTrackIndex); // Update the state to reflect the new track index
-    }
-  };
+  useEffect(() => {
+    switchAudioTrack();
+  }, [audioTrackIndex]);
 
   return (
     <div data-vjs-player>
