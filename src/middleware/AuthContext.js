@@ -57,7 +57,11 @@ export function AuthProvider({ children }) {
       await login(email, password);
       return { status: true };
     } catch (error) {
-      if (error.code === "auth/user-not-found" || error.code === "auth/invalid-login-credentials") {
+      if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/invalid-login-credentials" ||
+        "auth/invalid-credential"
+      ) {
         try {
           await register(email, password);
           return { status: true };
