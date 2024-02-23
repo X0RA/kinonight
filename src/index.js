@@ -4,12 +4,12 @@ import "./index.css";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
 import Root from "./pages/root";
+import Index from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import Index from "./pages/index";
-import Room from "./pages/room";
-import SubtitleUploadPage from "./pages/SubtitleUploadPage";
-
-import Temp from "./components/temp";
+import RoomOptions from "./pages/RoomOptions";
+import SubtitleUpload from "./pages/SubtitleUpload";
+import RoomInfo from "./pages/RoomInfo.js";
+import RoomWatch from "./pages/RoomWatch";
 
 const router = createHashRouter([
   {
@@ -23,15 +23,23 @@ const router = createHashRouter([
       },
       {
         path: "Room/:roomName",
-        element: <Room />,
+        element: <RoomOptions />,
+      },
+      {
+        path: "Room/",
+        element: <RoomOptions />,
       },
       {
         path: "subtitleUpload",
-        element: <SubtitleUploadPage />,
+        element: <SubtitleUpload />,
       },
       {
-        path: "test",
-        element: <Temp />,
+        path: "Room/:roomName/RoomInfo",
+        element: <RoomInfo />,
+      },
+      {
+        path: "Room/:roomName/watch",
+        element: <RoomWatch />,
       },
     ],
   },

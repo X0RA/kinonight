@@ -119,7 +119,7 @@ const useGetVideoInfo = (chosenRoom, callback) => {
   }, [chosenRoom, callback]);
 };
 
-const useSetStateInfo = (chosenRoom, newInfo) => {
+const useSetVideoState = (chosenRoom, newInfo) => {
   useEffect(() => {
     if (chosenRoom && newInfo) {
       const db = getDatabase();
@@ -132,7 +132,7 @@ const useSetStateInfo = (chosenRoom, newInfo) => {
   }, [chosenRoom, newInfo]);
 };
 
-const useGetStateInfo = (chosenRoom, callback) => {
+const useGetVideoState = (chosenRoom, callback) => {
   useEffect(() => {
     if (chosenRoom && callback) {
       const db = getDatabase();
@@ -191,16 +191,21 @@ export const UserStateProvider = ({ children }) => {
   const [chosenRoom, setChosenRoom] = useState(null);
   const [videoInfo, setVideoInfo] = useState(null);
   const [roomState, setRoomState] = useState(null);
-  const [videoOptions, setVideoOptions] = useState(null);
+  const [videoState, setVideoState] = useState(null);
   const [roomInfo, setRoomInfo] = useState(null);
+  const [videoOptions, setVideoOptions] = useState(null);
 
+  // shows the users in the room
   useUserPresence(chosenRoom);
   const connectedUsers = useRoomUsers(chosenRoom);
+
+  // video info is the url and subtitles
   useSetVideoInfo(chosenRoom, videoInfo);
   useGetVideoInfo(chosenRoom, setVideoInfo);
-  useSetStateInfo(chosenRoom, roomState);
-  useGetStateInfo(chosenRoom, setRoomState);
-
+  // video state is the current time and play/pause
+  useSetVideoState(chosenRoom, videoState);
+  useGetVideoState(chosenRoom, setVideoState);
+  // room info is the emoji handler and messages, password etc.
   useSetRoomInfo(chosenRoom, roomInfo);
   useGetRoomInfo(chosenRoom, setRoomInfo);
 
@@ -209,11 +214,13 @@ export const UserStateProvider = ({ children }) => {
     setChosenRoom,
     connectedUsers,
     videoInfo,
+    videoOptions,
+    setVideoOptions,
     setVideoInfo,
     roomState,
     setRoomState,
-    videoOptions,
-    setVideoOptions,
+    videoState,
+    setVideoState,
     roomInfo,
     setRoomInfo,
   };

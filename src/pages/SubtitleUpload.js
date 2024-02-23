@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { uploadFile } from "../middleware/Storage";
 
-export default function SubtitleUploadPage() {
+export default function SubtitleUpload() {
   const [file, setFile] = useState(null);
   const [uploadUrl, setUploadUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);

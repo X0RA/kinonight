@@ -19,7 +19,19 @@ import EmojiSelector from "./emojiPicker";
 
 const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, sidebar, setSidebar }) => {
   const [cookies, setCookie] = useCookies(["roompw", "volumepercent"]);
-  const { chosenRoom, setVideoInfo, roomState, setRoomState, videoInfo, roomInfo, setRoomInfo } = useUserStatus();
+  const {
+    chosenRoom,
+    setChosenRoom,
+    connectedUsers,
+    videoInfo, // For subtitle show / hide
+    setVideoInfo,
+    roomState,
+    setRoomState,
+    videoState,
+    setVideoState,
+    roomInfo,
+    setRoomInfo,
+  } = useUserStatus();
   const { utcTime } = useAuth();
   const [showTimeLeft, setShowTimeLeft] = useState(false);
 
@@ -210,12 +222,12 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       const seekPercentage = (clickPosition / progressBarWidth) * 100;
       const seekTime = (seekPercentage / 100) * progress.duration;
 
-      const videoState = {
+      const newVideoState = {
         video_length: progress.duration,
         video_position: seekTime,
         last_update_time: utcTime(),
       };
-      setRoomState(videoState);
+      setVideoState(newVideoState);
     }
   };
   //#endregion
@@ -242,9 +254,9 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     if (stateSnapshot) {
       // ideal video position
       const currentTimeInMs = utcTime();
-      const lastUpdateTimeInMs = roomState.last_update_time;
+      const lastUpdateTimeInMs = videoState.last_update_time;
       const offsetInSeconds = (currentTimeInMs - lastUpdateTimeInMs) / 1000;
-      const videoPosition = roomState.video_position || 0;
+      const videoPosition = videoState.video_position || 0;
       const newVideoPosition = videoPosition + offsetInSeconds;
 
       // Update the msOffset state with two decimal places
@@ -264,89 +276,89 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
   useEffect(() => {
     const syncVideoState = async () => {
       await checkPlayerReadyState(playerRef);
-      if (roomState) {
+      if (videoState) {
         // this means its a first load
         // cookies volume logic
         if (cookies["volumepercent"]) {
           changeVolume(cookies["volumepercent"]);
         }
         if (!stateSnapshot) {
-          setStateSnapshot(roomState);
-          if (roomState.is_playing) {
+          setStateSnapshot(videoState);
+          if (videoState.is_playing) {
             playerRef.current.play();
           } else {
             playerRef.current.pause();
           }
           const currentTimeInMs = new Date().getTime();
-          const lastUpdateTimeInMs = roomState.last_update_time;
+          const lastUpdateTimeInMs = videoState.last_update_time;
           const offsetInSeconds = (currentTimeInMs - lastUpdateTimeInMs) / 1000;
-          const videoPosition = roomState.video_position || 0;
+          const videoPosition = videoState.video_position || 0;
           const newVideoPosition = videoPosition + offsetInSeconds;
           playerRef.current.currentTime(newVideoPosition);
-        } else if (stateSnapshot !== roomState) {
-          if (roomState.is_playing) {
+        } else if (stateSnapshot !== videoState) {
+          if (videoState.is_playing) {
             playerRef.current.play();
-          } else if (!roomState.is_playing) {
+          } else if (!videoState.is_playing) {
             playerRef.current.pause();
           }
-          if (roomState.video_position !== progress.current) {
-            playerRef.current.currentTime(roomState.video_position);
+          if (videoState.video_position !== progress.current) {
+            playerRef.current.currentTime(videoState.video_position);
           }
-          setStateSnapshot(roomState);
+          setStateSnapshot(videoState);
         }
       }
     };
 
     syncVideoState();
-  }, [roomState, playerRef]);
+  }, [videoState, playerRef]);
   //#endregion
 
   //#region play, pause, rewind, forward
   const play = () => {
     if (playerRef.current) {
-      const videoState = {
+      const newVideoState = {
         is_playing: true,
         video_length: progress.duration,
         video_position: progress.current,
         last_update_time: utcTime(),
       };
-      setRoomState(videoState);
+      setVideoState(newVideoState);
     }
   };
 
   const pause = () => {
     if (playerRef.current) {
-      const videoState = {
+      const newVideoState = {
         is_playing: false,
         video_length: progress.duration,
         video_position: progress.current,
         last_update_time: utcTime(),
       };
-      setRoomState(videoState);
+      setVideoState(newVideoState);
     }
   };
 
   const rewind = () => {
     if (playerRef.current) {
       const newTime = playerRef.current.currentTime() - 30;
-      const videoState = {
+      const newVideoState = {
         video_length: progress.duration,
         video_position: newTime,
         last_update_time: utcTime(),
       };
-      setRoomState(videoState);
+      setVideoState(newVideoState);
     }
   };
 
   const ff = () => {
     if (playerRef.current) {
       const newTime = playerRef.current.currentTime() + 30;
-      const videoState = {
+      const newVideoState = {
         video_length: progress.duration,
         video_position: newTime,
         last_update_time: utcTime(),
       };
-      setRoomState(videoState);
+      setVideoState(newVideoState);
     }
   };
   //#endregion
@@ -379,8 +391,8 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
           video_name: "",
           video_url: "",
           subtitle_url: "",
-          room_password: "",
-          video_info: {},
+          hls: false,
+          // video_info: {},
         });
         setRoomInfo({
           ...roomInfo,
@@ -393,26 +405,26 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
     },
     playPause: {
       icon:
-        roomState && roomState.is_playing !== undefined ? (
-          roomState.is_playing ? (
+        videoState && videoState.is_playing !== undefined ? (
+          videoState.is_playing ? (
             <Pause color="slate-800" className="dark:text-slate-300 w-5" />
           ) : (
             <Play color="slate-800" className="dark:text-slate-300 w-5" />
           )
         ) : (
-          // Default icon if roomState or is_playing is undefined
+          // Default icon if videoState or is_playing is undefined
           <Play color="slate-800" className="dark:text-slate-300 w-5" />
         ),
-      tooltip: roomState.is_playing ? "Pause" : "Play",
+      tooltip: videoState.is_playing ? "Pause" : "Play",
       onClick: () => {
-        if (roomState && roomState.is_playing !== undefined) {
-          if (roomState.is_playing) {
+        if (videoState && videoState.is_playing !== undefined) {
+          if (videoState.is_playing) {
             pause();
           } else {
             play();
           }
         } else {
-          console.error("Error: roomState or is_playing is undefined");
+          console.error("Error: videoState or is_playing is undefined");
         }
       },
       className: `${buttonCSS} `,
@@ -724,6 +736,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
             })}
             {/* time info */}
             <button
+              key="time_info"
               title={showTimeLeft ? "Show time elapsed" : "Show time left"}
               className="overflow-hidden flex items-center justify-center w-auto min-w-fit h-11 bg-slate-600 border-slate-700 hover:bg-slate-700 border- dark:bg-slate-900 dark:border-slate-500 dark:hover:bg-slate-800 dark:text-slate-300 text-slate-800 "
               onClick={() => {

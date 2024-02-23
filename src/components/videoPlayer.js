@@ -14,12 +14,10 @@ export const VideoJS = (props) => {
   const playerRef = useRef(null);
   const { options, onReady, clearVideo } = props;
   const Navigate = useNavigate();
-  const { setVideoOptions } = useUserStatus();
+  const { setVideoInfo } = useUserStatus();
 
   // mobile controls
-  const [isLandscape, setIsLandscape] = useState(
-    window.innerWidth > window.innerHeight,
-  );
+  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(window.navigator.userAgent);
   useEffect(() => {
     const handleResize = () => {
@@ -32,6 +30,18 @@ export const VideoJS = (props) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    // Helper function to extract room name from URL
+    const extractRoomNameFromURL = (url) => {
+      const parts = url.split("/");
+      const roomIndex = parts.findIndex((part) => part.toLowerCase() === "room");
+      return roomIndex !== -1 && parts[roomIndex + 1] ? parts[roomIndex + 1] : null;
+    };
+    if (!options && playerRef.current) {
+      Navigate(`/room/${extractRoomNameFromURL(window.location.href)}`);
+    }
+  }, [options]);
 
   useEffect(() => {
     if (isMobile) {
@@ -92,10 +102,7 @@ export const VideoJS = (props) => {
       const style = window.getComputedStyle(subDisplay);
       const insetHeight = style.getPropertyValue("inset");
       const cueHeight = parseInt(insetHeight.split(" ")[0].replace("px", ""));
-      const subtitleOffset =
-        alteredSub !== null
-          ? ` ${cueHeight + 68}px 0px 0px`
-          : ` ${cueHeight - 68}px 0px 0px`;
+      const subtitleOffset = alteredSub !== null ? ` ${cueHeight + 68}px 0px 0px` : ` ${cueHeight - 68}px 0px 0px`;
 
       if (doMove) {
         subDisplay.style.setProperty("inset", subtitleOffset);
@@ -119,12 +126,7 @@ export const VideoJS = (props) => {
     if (!playerRef.current) {
       const videoElement = document.createElement("video-js");
 
-      videoElement.classList.add(
-        "video-js",
-        "vjs-default-skin",
-        "vjs-16-9",
-        "vjs-big-play-centered",
-      );
+      videoElement.classList.add("video-js", "vjs-default-skin", "vjs-16-9", "vjs-big-play-centered");
 
       videoElement.style.width = "100%";
       videoElement.style.height = "100%";
@@ -142,17 +144,12 @@ export const VideoJS = (props) => {
           percentage: (player.currentTime() / player.duration()) * 100,
         });
       });
-    } else {
-      const player = playerRef.current;
-
-      player.autoplay(options.autoplay);
-      player.src(options.sources);
     }
   }, [options, videoRef]);
 
   const logOut = () => {
     document.cookie = "room=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    setVideoOptions(null);
+    setVideoInfo(null);
     Navigate("/");
   };
 
@@ -187,10 +184,8 @@ export const VideoJS = (props) => {
         <Sidebar />
       </div>
       <div className={`h-screen w-full ${mainContentClass}`}>
-        <div
-          data-vjs-player
-          className="relative flex h-full w-full items-center justify-center bg-black"
-        >
+        <div data-vjs-player className="relative flex h-full w-full items-center justify-center bg-black">
+          {/* if options then render the div */}
           <div
             ref={videoRef}
             className="aspect-[16/9] max-h-screen w-full object-cover"
@@ -206,8 +201,7 @@ export const VideoJS = (props) => {
               progress={progress}
               logOut={logOut}
               clearVideo={clearVideo}
-              formatTime={formatTime}
-            ></MobileControls>
+              formatTime={formatTime}></MobileControls>
           ) : (
             // <div
             // ref={controlBarRef}
@@ -226,8 +220,7 @@ export const VideoJS = (props) => {
               onMouseLeave={() => {
                 adjustSubtitlePosition(false);
               }}
-              className="control-bar bg-primary-500 h-18 absolute bottom-0 w-full opacity-0 transition-opacity duration-200 hover:opacity-100"
-            >
+              className="control-bar bg-primary-500 h-18 absolute bottom-0 w-full opacity-0 transition-opacity duration-200 hover:opacity-100">
               <DesktopControls
                 playerRef={playerRef}
                 setSidebar={setDoShowSidebar}
@@ -235,8 +228,7 @@ export const VideoJS = (props) => {
                 progress={progress}
                 logOut={logOut}
                 clearVideo={clearVideo}
-                formatTime={formatTime}
-              ></DesktopControls>
+                formatTime={formatTime}></DesktopControls>
             </div>
           )}
         </div>

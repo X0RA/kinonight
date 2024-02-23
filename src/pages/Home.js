@@ -1,41 +1,40 @@
-import { useCookies } from "react-cookie";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../middleware/AuthContext";
 
+// for the toast message
 import { Fragment } from "react";
 import { Transition } from "@headlessui/react";
 
-function Index() {
-  const [cookies, setCookie] = useCookies([
-    "room",
-    "accountName",
-    "password",
-    "displayName",
-  ]);
+// context
+import { useAuth } from "../middleware/AuthContext";
+
+// cookies
+import { useCookieManagement } from "../middleware/cookieManagement";
+
+function Home() {
+  const { updateCookie, getCookie } = useCookieManagement();
+  const { currentUser, loginOrSignUp, setUsername } = useAuth();
+  const navigate = useNavigate();
+
+  // states
   const [accountName, setAccountName] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [room, setRoom] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const { currentUser, loginOrSignUp, setUsername } = useAuth();
 
   const handleJoin = async () => {
     if (!currentUser) {
-      let res = await loginOrSignUp(
-        accountName + "@xkiinonight.web.app",
-        password,
-      );
+      let res = await loginOrSignUp(accountName + "@xkiinonight.web.app", password);
       if (res.status) {
         await setUsername(displayName);
         if (room && room.trim() !== "") {
-          setCookie("accountName", accountName, {
+          updateCookie("accountName", accountName, {
             path: "/",
             sameSite: "Strict",
           });
-          setCookie("password", password, { path: "/", sameSite: "Strict" });
-          setCookie("displayName", displayName, {
+          updateCookie("password", password, { path: "/", sameSite: "Strict" });
+          updateCookie("displayName", displayName, {
             path: "/",
             sameSite: "Strict",
           });
@@ -52,7 +51,7 @@ function Index() {
       if (currentUser.displayName !== displayName) {
         await setUsername(displayName);
       }
-      setCookie("displayName", displayName, { path: "/", sameSite: "Strict" });
+      updateCookie("displayName", displayName, { path: "/", sameSite: "Strict" });
       if (room && room.trim() !== "") {
         navigate("/room/" + room);
       } else {
@@ -63,8 +62,7 @@ function Index() {
 
   function generateRandomString(length) {
     let result = "";
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -73,8 +71,25 @@ function Index() {
   }
 
   useEffect(() => {
-    setAccountName(generateRandomString(10));
-    setPassword(generateRandomString(10));
+    if (getCookie("room")) {
+      setRoom(getCookie("room"));
+    }
+    if (getCookie("accountName")) {
+      setAccountName(getCookie("accountName"));
+    }
+    if (getCookie("displayName")) {
+      setDisplayName(getCookie("displayName"));
+    }
+    if (getCookie("password")) {
+      setPassword(getCookie("password"));
+    }
+    // if there is no account name or password then randomly genreate one
+    if (!accountName) {
+      setAccountName(generateRandomString(10));
+    }
+    if (!password) {
+      setPassword(generateRandomString(10));
+    }
   }, []);
 
   useEffect(() => {
@@ -85,26 +100,8 @@ function Index() {
     }
   }, [error]);
 
-  useEffect(() => {
-    if (cookies.room) {
-      setRoom(cookies.room);
-    }
-    if (cookies.accountName) {
-      setAccountName(cookies.accountName);
-    }
-    if (cookies.displayName) {
-      setDisplayName(cookies.displayName);
-    }
-    if (cookies.password) {
-      setPassword(cookies.password);
-    }
-  }, []);
-
   return (
     <div className="bg-primary-400 flex h-screen flex-col items-center justify-start space-y-8 pt-20">
-      {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
-        TEST
-    <div className="flex flex-col justify-start items-center h-screen bg-primary-400 space-y-8 pt-20">
       {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
         BIG HUGE TEST
       </button> */}
@@ -115,9 +112,7 @@ function Index() {
         {/* conditional if logged in */}
         {currentUser && (
           <>
-            <div className="col-span-4 w-full text-center text-white">
-              Logged in as {currentUser.displayName}
-            </div>
+            <div className="col-span-4 w-full text-center text-white">Logged in as {currentUser.displayName}</div>
           </>
         )}
 
@@ -153,10 +148,7 @@ function Index() {
         </div>
         {/* join button */}
         <div className={currentUser ? "col-span-4" : "col-span-4"}>
-          <button
-            className="text-primary-400 mt-2 w-full rounded-lg bg-white p-2 font-bold"
-            onClick={handleJoin}
-          >
+          <button className="text-primary-400 mt-2 w-full rounded-lg bg-white p-2 font-bold" onClick={handleJoin}>
             Join
           </button>
         </div>
@@ -169,8 +161,7 @@ function Index() {
           enterTo="opacity-100 scale-100"
           leave="transition ease-in duration-200"
           leaveFrom="opacity-100 scale-100"
-          leaveTo="opacity-0 scale-95"
-        >
+          leaveTo="opacity-0 scale-95">
           <div className=" bg-primary-900 pointer-events-none fixed right-0 top-0 m-4 rounded-lg">
             <div className="pointer-events-auto w-full max-w-sm rounded-lg bg-red-500 shadow-lg">
               <div className="p-4">
@@ -190,4 +181,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default Home;

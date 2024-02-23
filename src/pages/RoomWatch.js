@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
 import { useUserStatus } from "../middleware/StateContext";
 import { useAuth } from "../middleware/AuthContext";
 import { processUrl } from "../components/helpers";
 import { VideoJS } from "../components/videoPlayer";
-import VideoOptionsPage from "../components/videoOptions";
 import EmojiReactions from "../components/emojiOverlay";
+import { useCookieManagement } from "../middleware/cookieManagement";
 
 function Room() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [cookies, setCookie] = useCookies(["room", "username"]);
+  const { updateCookie, getCookie } = useCookieManagement();
   const [loading, setLoading] = useState(true);
-  const { setChosenRoom, videoInfo, videoOptions, setVideoOptions } = useUserStatus();
+  const {
+    chosenRoom,
+    setChosenRoom,
+    connectedUsers,
+    videoInfo,
+    setVideoInfo,
+    roomState,
+    setRoomState,
+    videoState,
+    setVideoState,
+    videoOptions,
+    setVideoOptions,
+    roomInfo,
+    setRoomInfo,
+  } = useUserStatus();
   const [userInteraction, setUserInteraction] = useState(false);
 
   // hide cursor when not in use when video is playing
@@ -39,19 +52,24 @@ function Room() {
 
   // Redirects to the login page if the user is not logged in
   useEffect(() => {
+    const roomName = extractRoomNameFromURL(window.location.href);
     if (!currentUser) {
-      setCookie("room", extractRoomNameFromURL(window.location.href), { path: "/", sameSite: "Strict" });
+      updateCookie("room", roomName);
       navigate("/");
       return;
+    } else {
+      if (!videoInfo) {
+        navigate(`/room/${roomName}`);
+      }
     }
     setCookieForCurrentUser(currentUser);
     setRoomFromURL();
-  }, [currentUser, navigate, setCookie]);
+  }, [currentUser, navigate, videoInfo]);
 
   // Sets a cookie for the current user's username
   const setCookieForCurrentUser = (currentUser) => {
     const username = currentUser.email.split("@")[0];
-    setCookie("username", username, { path: "/", sameSite: "Strict" });
+    updateCookie("username", username);
   };
 
   // Extracts the room name from the URL and updates the chosenRoom state and cookie
@@ -59,15 +77,15 @@ function Room() {
     const roomName = extractRoomNameFromURL(window.location.href);
     if (roomName) {
       setChosenRoom(roomName);
-      setCookie("room", roomName, { path: "/", sameSite: "Strict" });
+      updateCookie("room", roomName);
     }
   };
 
   // Helper function to extract room name from URL
   const extractRoomNameFromURL = (url) => {
-    const urlRegEx = new RegExp("/Room/(.*)", "i");
-    const urlMatch = urlRegEx.exec(url);
-    return urlMatch && urlMatch[1] ? urlMatch[1] : null;
+    const parts = url.split("/");
+    const roomIndex = parts.findIndex((part) => part.toLowerCase() === "room");
+    return roomIndex !== -1 && parts[roomIndex + 1] ? parts[roomIndex + 1] : null;
   };
 
   // Sets video options based on videoInfo
@@ -97,6 +115,7 @@ function Room() {
     if (!videoUrl.status) {
       return;
     }
+
     const opts = createVideoOptions(options.hls ? videoUrl.hls_url : videoUrl.url, options.subtitle_url, options.hls);
     setVideoOptions(opts);
   };
@@ -129,16 +148,10 @@ function Room() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-primary-400">
-        <div className="flex flex-col items-center justify-center w-1/2 h-1/2  rounded-lg">
-          <h1 className="text-2xl font-bold">Loading...</h1>
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
-  }
-
-  if (videoOptions === null) {
-    return <VideoOptionsPage />;
   }
 
   if (!userInteraction) {
@@ -164,6 +177,6 @@ function Room() {
       <VideoJS options={videoOptions} />
     </div>
   );
-}  
+}
 
 export default Room;

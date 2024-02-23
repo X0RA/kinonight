@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
-
 import auth from "./Firebase";
 
 const AuthContext = createContext();
@@ -46,6 +45,10 @@ export function AuthProvider({ children }) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
+  function logout() {
+    return signOut(auth);
+  }
+
   function setUsername(username) {
     return updateProfile(auth.currentUser, {
       displayName: username,
@@ -80,10 +83,6 @@ export function AuthProvider({ children }) {
         return { status: false, message: errorMessage };
       }
     }
-  }
-
-  function logout() {
-    return signOut(auth);
   }
 
   useEffect(() => {
