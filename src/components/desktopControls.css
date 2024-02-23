@@ -9,11 +9,13 @@
 
 /* Hide the tooltip by default */
 .tooltip-hidden {
-    visibility: hidden;
+    position: absolute;
+    z-index: 20;
+    visibility: hidden; /* Initially hidden */
     opacity: 0;
-    transition: visibility 0s, opacity 0.5s linear;
-}
-
+    transition: opacity 0.3s ease-in-out;
+    /* Add your other styles */
+  }
 /* Show the tooltip when the button is hovered over */
 button:hover + .tooltip {
     visibility: visible;

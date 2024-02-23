@@ -509,16 +509,19 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
         <SidebarCollapse
           color="slate-800"
           className={`dark:text-slate-300 ${sidebar ? "" : "transform rotate-180"} w-5`}
+          title={sidebar ? "Collapse Sidebar" : "Open Sidebar"}
         />
       ),
-      tooltip: sidebar ? "Collapse Sidebar" : "Open Sidebar",
+      // tooltip: sidebar ? "Collapse Sidebar" : "Open Sidebar",
       onClick: () => setSidebar(!sidebar),
       className: `${buttonCSS}`,
       disabled: false,
     },
     fullScreen: {
-      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6" />,
-      tooltip: "Toggle Fullscreen",
+      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6"
+      title="Toggle Fullscreen"
+      />,
+      // tooltip: "Toggle Fullscreen",
       onClick: () => {
         requestFullscreen();
       },
@@ -748,7 +751,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
             </button>
           </div>
           {/* bottom rhs buttons */}
-          <div className="flex space-x-0">
+          <div className="flex space-x-0 ">
             <button
               title="Sync offset"
               className={` rounded-full pl-6 relative overflow-hidden flex items-center justify-center w-auto min-w-fit h-11 hover:bg-slate-700 dark:bg-slate-900  dark:hover:bg-slate-800 dark:text-slate-300   ${
@@ -779,13 +782,18 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
                     disabled={rhsButtons[key].disabled}>
                     {rhsButtons[key].icon}
                   </button>
-                  <div
-                    id={`tooltip-${key}`}
-                    role="tooltip"
-                    className="absolute z-20 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700 bottom-full whitespace-nowrap">
-                    {rhsButtons[key].tooltip ? rhsButtons[key].tooltip : ""}
-                    <div className="tooltip-arrow" data-popper-arrow></div>
-                  </div>
+                  {/* create if conditional if there is a tooltip  in key*/}
+                  {rhsButtons[key].tooltip ? (
+                    <div
+                      id={`tooltip-${key}`}
+                      role="tooltip"
+                      className="absolute z-20 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700 bottom-full whitespace-nowrap">
+                      {rhsButtons[key].tooltip ? rhsButtons[key].tooltip : ""}
+                      <div className="tooltip-arrow" data-popper-arrow></div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </>
               );
             })}
