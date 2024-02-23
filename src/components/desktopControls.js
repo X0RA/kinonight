@@ -678,7 +678,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
           {volume === 0 ? (
             <VolumeMute
               onClick={() => {
-                changeVolume(oldVolume); // Assuming you want to reset volume to a default level (e.g., 50) when clicked
+                changeVolume(oldVolume); 
               }}
               color="slate-800"
               className="dark:text-slate-300 w-5"
