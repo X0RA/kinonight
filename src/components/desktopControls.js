@@ -168,11 +168,14 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
 
   //#region volume
   const [volume, setVolume] = useState(100);
+  const [oldVolume, setOldVolume] = useState(null);
   const changeVolume = (newVolume) => {
-    setCookie("volumepercent", newVolume, { path: "/", sameSite: "Strict" });
-    setVolume(newVolume);
+    const intNewVolume = parseInt(newVolume, 10) || 0;
+    setCookie("volumepercent", intNewVolume, { path: "/", sameSite: "Strict" });
+    setOldVolume(parseInt(volume, 10));
+    setVolume(intNewVolume);
     if (playerRef.current) {
-      playerRef.current.volume(newVolume / 100);
+      playerRef.current.volume(intNewVolume / 100);
     }
   };
   //#endregion
@@ -518,9 +521,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
       disabled: false,
     },
     fullScreen: {
-      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6"
-      title="Toggle Fullscreen"
-      />,
+      icon: <FullScreenMaximize color="slate-800" className="dark:text-slate-300 w-6" title="Toggle Fullscreen" />,
       // tooltip: "Toggle Fullscreen",
       onClick: () => {
         requestFullscreen();
@@ -674,8 +675,16 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
               style={{ width: `${progress.percentage}%` }}></div>
           </div>
           {/* volume bar */}
-          {volume < 10 ? (
+          {volume === 0 ? (
             <VolumeMute
+              onClick={() => {
+                changeVolume(oldVolume); // Assuming you want to reset volume to a default level (e.g., 50) when clicked
+              }}
+              color="slate-800"
+              className="dark:text-slate-300 w-5"
+            />
+          ) : volume < 10 ? (
+            <VolumeDown
               onClick={() => {
                 changeVolume(0);
               }}
@@ -699,6 +708,7 @@ const DesktopControls = ({ playerRef, progress, logOut, formatTime, clearVideo, 
               className="dark:text-slate-300 w-5"
             />
           )}
+
           <input
             id="small-range"
             type="range"
