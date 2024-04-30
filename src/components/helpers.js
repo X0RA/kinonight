@@ -29,43 +29,125 @@ export const processUrl = async (url) => {
   }
 };
 
+// const getPutIOVideoUrl = async (oauthToken) => {
+//   var apiUrl =
+//     "https://api.put.io/v2/files/public?codecs_parent=1&media_info_parent=1&mp4_status_parent=1&mp4_stream_url_parent=1&oauth_token=" +
+//     oauthToken +
+//     "&stream_url_parent=1&video_metadata_parent=1";
+//   var apiResponse = await fetch(apiUrl);
+//   if (apiResponse.ok === false || apiResponse.status !== 200) {
+//     return { status: false, url: null, error: "Probably an invalid link" };
+//   }
+
+//   var jsonData = await apiResponse.json();
+//   // if the file is not an mp4 and or it needs to be converted
+//   if (
+//     jsonData.parent.extension !== "mp4" &&
+//     jsonData.parent.need_convert === true
+//   ) {
+//     return { status: false, url: null, error: "There is no mp4 available yet" };
+//   }
+//   // if jsonData.parent.mp4_stream_url exists then use that, otherwise use jsonData.parent.stream_url
+//   const audioTracks = jsonData.parent.media_info.streams.filter(
+//     (stream) => stream.codec_type === "audio",
+//   );
+
+//   let hls_url = `https://api.put.io/v2/files/${jsonData.parent.id}/hls/media.m3u8?oauth_token=${oauthToken}&subtitle_languages=eng&original=0`;
+
+//   let data = {
+//     status: true,
+//     url: jsonData.parent.mp4_stream_url
+//       ? jsonData.parent.mp4_stream_url
+//       : jsonData.parent.stream_url,
+//     audioTracks: audioTracks,
+//     hls_url: hls_url,
+//   };
+
+
+//   return data;
+// };
+
+
+const getPutId = async (oauthToken) => {
+  const apiUrl = 'https://api.put.io/v2/public_share';
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Authorization': `token ${oauthToken}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('API response not OK');
+    }
+    const jsonData = await response.json();
+    return { status: true, data: {
+      id: jsonData.public_share.user_file.id,  // Adjusted assuming jsonData directly contains the file_id, change as per your API structure
+      name: jsonData.public_share.user_file.name // Same as above
+    }};
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return { status: false, error: 'Failed to fetch data' };
+  }
+}
+
+const getPutBreadcumbs = async (token, id) => {
+  const apiUrl = `https://api.put.io/v2/public_share/files/list?breadcrumbs=1&codecs_parent=1&media_info_parent=1&mp4_status_parent=1&parent_id=${id}&video_metadata_parent=1`;
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Authorization': `token ${token}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('API response not OK');
+    }
+    const jsonData = await response.json();
+    // Correctly navigate the JSON structure based on your API's response structure
+    return { status: true, data:
+      jsonData.parent
+    };
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return { status: false, error: 'Failed to fetch data' };
+  }
+}
+
 const getPutIOVideoUrl = async (oauthToken) => {
-  var apiUrl =
-    "https://api.put.io/v2/files/public?codecs_parent=1&media_info_parent=1&mp4_status_parent=1&mp4_stream_url_parent=1&oauth_token=" +
-    oauthToken +
-    "&stream_url_parent=1&video_metadata_parent=1";
-  var apiResponse = await fetch(apiUrl);
-  if (apiResponse.ok === false || apiResponse.status !== 200) {
-    return { status: false, url: null, error: "Probably an invalid link" };
+  try {
+    const putIDResponse = await getPutId(oauthToken);
+    if (putIDResponse.status === false) {
+      return {status: false};
+    }
+    const putId = putIDResponse.data.id;
+
+    const breadcrumbsResponse = await getPutBreadcumbs(oauthToken, putId);
+    if (breadcrumbsResponse.status === false) {
+      return {status: false};
+    }
+
+    // console.log(breadcrumbsResponse.data.mp4_stream_url)
+
+    const hls_url = `https://api.put.io/v2/files/${putId}/hls/media.m3u8?oauth_token=${oauthToken}&subtitle_languages=eng&original=${breadcrumbsResponse.data.mp4_stream_url  ? 0 : 1}`;
+    return {
+      status: true,
+      hls_url: hls_url,
+      url: breadcrumbsResponse.data.mp4_stream_url ? breadcrumbsResponse.data.mp4_stream_url : false
+    };
+  } catch (error) {
+    console.error('Error preparing video URL:', error);
+    return { status: false, error: 'Failed to prepare video URL' };
   }
-
-  var jsonData = await apiResponse.json();
-  // if the file is not an mp4 and or it needs to be converted
-  if (
-    jsonData.parent.extension !== "mp4" &&
-    jsonData.parent.need_convert === true
-  ) {
-    return { status: false, url: null, error: "There is no mp4 available yet" };
-  }
-  // if jsonData.parent.mp4_stream_url exists then use that, otherwise use jsonData.parent.stream_url
-  const audioTracks = jsonData.parent.media_info.streams.filter(
-    (stream) => stream.codec_type === "audio",
-  );
-
-  let hls_url = `https://api.put.io/v2/files/${jsonData.parent.id}/hls/media.m3u8?oauth_token=${oauthToken}&subtitle_languages=eng&original=0`;
-
-  let data = {
-    status: true,
-    url: jsonData.parent.mp4_stream_url
-      ? jsonData.parent.mp4_stream_url
-      : jsonData.parent.stream_url,
-    audioTracks: audioTracks,
-    hls_url: hls_url,
-  };
-
-
-  return data;
 };
+
+
 
 const getYoutubeVideoUrl = async (url) => {
   return { status: false, error: "Error while fetching video URL" };

@@ -97,10 +97,14 @@ function RoomOptions() {
 
     if (updatedInfo.video_url) {
       let validFile = await processUrl(updatedInfo.video_url);
-      // hls stuff here
       if (!validFile.status) {
         alert("Invalid URL");
         return;
+      }
+      // hls stuff here
+      if (validFile.url === false) {
+        setNewInfo({ ...newInfo, hls: true });
+        updatedInfo.hls = true;
       }
     }
 
