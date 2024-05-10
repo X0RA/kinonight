@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import packageJson from "../../package.json";
 
 // for the toast message
 import { Fragment } from "react";
@@ -102,6 +103,7 @@ function Home() {
 
   return (
     <div className="bg-primary-400 flex h-screen flex-col items-center justify-start space-y-8 pt-20">
+      <p className=" absolute left-0 top-0 opacity-40 ">Version: {packageJson.version}</p>
       {/* <button className="absolute top-0 right-0 m-4" onClick={() => navigate("/test")}>
         BIG HUGE TEST
       </button> */}
